@@ -1,3 +1,5 @@
 
 # external upstream examples
 examples/upstream/
+
+.cleanup-backup/
