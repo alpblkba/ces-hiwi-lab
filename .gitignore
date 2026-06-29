@@ -3,3 +3,76 @@
 examples/upstream/
 
 .cleanup-backup/
+
+# -------------------------------------------------------------------
+# Xilinx / AMD Vivado, Vitis HLS, Vitis generated files
+# -------------------------------------------------------------------
+
+# General Xilinx logs and journals
+*.jou
+*.log
+*.str
+*.zip.tmp
+hs_err_pid*.log
+vivado_pid*.str
+
+# Vivado generated directories
+.Xil/
+*.cache/
+*.hw/
+*.ip_user_files/
+*.sim/
+*.runs/
+*.gen/
+*.srcs/sources_1/bd/*/ip/
+*.srcs/sources_1/bd/*/ipshared/
+*.srcs/sources_1/bd/*/hw_handoff/
+*.srcs/sources_1/bd/*/ui/
+*.srcs/sources_1/bd/*/synth/
+*.srcs/sources_1/bd/*/sim/
+
+# Vitis / Eclipse workspace metadata
+.metadata/
+RemoteSystemsTempFiles/
+.settings/
+.cproject
+.project
+
+# Vitis build outputs
+Debug/
+Release/
+*/Debug/
+*/Release/
+*.elf
+*.o
+*.d
+*.map
+*.bif
+*.bin
+*.bit
+
+# Vitis generated platform/BSP/FSBL output
+labs/lab2/task2/vitis/seven_segment_platform/export/
+labs/lab2/task2/vitis/seven_segment_platform/ps7_cortexa9_0/
+labs/lab2/task2/vitis/seven_segment_platform/zynq_fsbl/
+
+# Keep only the important Vitis platform project metadata and exported hardware
+!labs/lab2/task2/vitis/seven_segment_platform/platform.spr
+!labs/lab2/task2/vitis/seven_segment_platform/hw/
+!labs/lab2/task2/vitis/seven_segment_platform/hw/seven_segment_wrapper.xsa
+
+# Vitis HLS generated simulation/build internals
+labs/lab2/task1/hls/solution1/csim/build/
+labs/lab2/task1/hls/solution1/.autopilot/
+labs/lab2/task1/hls/solution1/.debug/
+
+# OS/editor junk
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Generated documentation/helper artifacts
+README.md.bak
+all-docs-preview.md
+files.txt

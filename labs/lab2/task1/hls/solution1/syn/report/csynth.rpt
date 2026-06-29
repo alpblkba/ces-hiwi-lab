@@ -1,0 +1,111 @@
+
+
+================================================================
+== Synthesis Summary Report of 'seven_segment_axi'
+================================================================
++ General Information: 
+    * Date:           Mon Jun 29 12:54:58 2026
+    * Version:        2022.2 (Build 3670227 on Oct 13 2022)
+    * Project:        lab2_task1_hls
+    * Solution:       solution1 (Vivado IP Flow Target)
+    * Product family: zynq
+    * Target device:  xc7z007s-clg400-1
+    
+
++ Performance & Resource Estimates: 
+    
+    PS: '+' for module; 'o' for loop; '*' for dataflow
+    +---------------------+------+------+---------+--------+----------+---------+------+----------+------+----+----------+-----------+-----+
+    |       Modules       | Issue|      | Latency | Latency| Iteration|         | Trip |          |      |    |          |           |     |
+    |       & Loops       | Type | Slack| (cycles)|  (ns)  |  Latency | Interval| Count| Pipelined| BRAM | DSP|    FF    |    LUT    | URAM|
+    +---------------------+------+------+---------+--------+----------+---------+------+----------+------+----+----------+-----------+-----+
+    |+ seven_segment_axi  |     -|  4.24|        0|   0.000|         -|        1|     -|        no|     -|   -|  46 (~0%)|  113 (~0%)|    -|
+    +---------------------+------+------+---------+--------+----------+---------+------+----------+------+----+----------+-----------+-----+
+
+
+================================================================
+== HW Interfaces
+================================================================
+* S_AXILITE Interfaces
++------------+------------+---------------+--------+----------+
+| Interface  | Data Width | Address Width | Offset | Register |
++------------+------------+---------------+--------+----------+
+| s_axi_CTRL | 32         | 5             | 16     | 0        |
++------------+------------+---------------+--------+----------+
+
+* S_AXILITE Registers
++------------+----------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+| Interface  | Register | Offset | Width | Access | Description                      | Bit Fields                                                           |
++------------+----------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+| s_axi_CTRL | CTRL     | 0x00   | 32    | RW     | Control signals                  | 0=AP_START 1=AP_DONE 2=AP_IDLE 3=AP_READY 7=AUTO_RESTART 9=INTERRUPT |
+| s_axi_CTRL | GIER     | 0x04   | 32    | RW     | Global Interrupt Enable Register | 0=Enable                                                             |
+| s_axi_CTRL | IP_IER   | 0x08   | 32    | RW     | IP Interrupt Enable Register     | 0=CHAN0_INT_EN 1=CHAN1_INT_EN                                        |
+| s_axi_CTRL | IP_ISR   | 0x0c   | 32    | RW     | IP Interrupt Status Register     | 0=CHAN0_INT_ST 1=CHAN1_INT_ST                                        |
+| s_axi_CTRL | digit    | 0x10   | 32    | W      | Data signal of digit             |                                                                      |
++------------+----------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+
+* Other Ports
++-----------+---------+----------+
+| Interface | Mode    | Bitwidth |
++-----------+---------+----------+
+| an        | ap_none | 4        |
+| seg       | ap_none | 8        |
++-----------+---------+----------+
+
+* TOP LEVEL CONTROL
++-----------+------------+-----------+
+| Interface | Type       | Ports     |
++-----------+------------+-----------+
+| ap_clk    | clock      | ap_clk    |
+| ap_rst_n  | reset      | ap_rst_n  |
+| interrupt | interrupt  | interrupt |
+| ap_ctrl   | ap_ctrl_hs |           |
++-----------+------------+-----------+
+
+
+================================================================
+== SW I/O Information
+================================================================
+* Top Function Arguments
++----------+-----------+-------------+
+| Argument | Direction | Datatype    |
++----------+-----------+-------------+
+| digit    | in        | ap_uint<4>  |
+| seg      | out       | ap_uint<8>* |
+| an       | out       | ap_uint<4>* |
++----------+-----------+-------------+
+
+* SW-to-HW Mapping
++----------+--------------+----------+---------------------------------+
+| Argument | HW Interface | HW Type  | HW Info                         |
++----------+--------------+----------+---------------------------------+
+| digit    | s_axi_CTRL   | register | name=digit offset=0x10 range=32 |
+| seg      | seg          | port     |                                 |
+| an       | an           | port     |                                 |
++----------+--------------+----------+---------------------------------+
+
+
+================================================================
+== Bind Op Report
+================================================================
+  No bind op info in design
+
+================================================================
+== Bind Storage Report
+================================================================
+  No bind storage info in design
+
+================================================================
+== Pragma Report
+================================================================
+* Valid Pragma Syntax
++-----------+-----------------------------------+---------------------------------------------------------------------+
+| Type      | Options                           | Location                                                            |
++-----------+-----------------------------------+---------------------------------------------------------------------+
+| interface | s_axilite port=digit bundle=CTRL  | lab2_task1_hls/seven_segment_axi.cpp:4 in seven_segment_axi, digit  |
+| interface | ap_none port=seg                  | lab2_task1_hls/seven_segment_axi.cpp:5 in seven_segment_axi, seg    |
+| interface | ap_none port=an                   | lab2_task1_hls/seven_segment_axi.cpp:6 in seven_segment_axi, an     |
+| interface | s_axilite port=return bundle=CTRL | lab2_task1_hls/seven_segment_axi.cpp:7 in seven_segment_axi, return |
++-----------+-----------------------------------+---------------------------------------------------------------------+
+
+

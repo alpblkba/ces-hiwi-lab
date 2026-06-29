@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<autopilotfilemapping:AutoPilotFileMapping xmlns:autopilotfilemapping="www.autoesl.com/autopilotfilemapping">
+  <source>
+    <originFiles name="seven_segment_axi.cpp" path="/home/urelg/vitis/lab2_task1/lab2_task1_hls/seven_segment_axi.cpp"/>
+    <originFiles name="seven_segment_axi.h" path="/home/urelg/vitis/lab2_task1/lab2_task1_hls/seven_segment_axi.h"/>
+  </source>
+  <testbench>
+    <originFiles name="seven_segment_axi_tb.cpp" path="/home/urelg/vitis/lab2_task1/lab2_task1_hls/seven_segment_axi_tb.cpp"/>
+  </testbench>
+</autopilotfilemapping:AutoPilotFileMapping>
