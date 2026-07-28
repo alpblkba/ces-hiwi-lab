@@ -1,0 +1,101 @@
+
+
+================================================================
+== Synthesis Summary Report of 'seven_segment'
+================================================================
++ General Information: 
+    * Date:           Tue Jul 28 21:10:48 2026
+    * Version:        2022.2 (Build 3670227 on Oct 13 2022)
+    * Project:        seven_segment_hls
+    * Solution:       solution1 (Vivado IP Flow Target)
+    * Product family: zynq
+    * Target device:  xc7z007s-clg400-1
+    
+
++ Performance & Resource Estimates: 
+    
+    PS: '+' for module; 'o' for loop; '*' for dataflow
+    +-----------------+------+------+---------+---------+----------+---------+------+----------+------+----+-----------+-----------+-----+
+    |     Modules     | Issue|      | Latency | Latency | Iteration|         | Trip |          |      |    |           |           |     |
+    |     & Loops     | Type | Slack| (cycles)|   (ns)  |  Latency | Interval| Count| Pipelined| BRAM | DSP|     FF    |    LUT    | URAM|
+    +-----------------+------+------+---------+---------+----------+---------+------+----------+------+----+-----------+-----------+-----+
+    |+ seven_segment  |     -|  5.63|       34|  680.000|         -|        1|     -|       yes|     -|   -|  1568 (5%)|  1169 (8%)|    -|
+    +-----------------+------+------+---------+---------+----------+---------+------+----------+------+----+-----------+-----------+-----+
+
+
+================================================================
+== HW Interfaces
+================================================================
+* Other Ports
++-----------+---------+----------+
+| Interface | Mode    | Bitwidth |
++-----------+---------+----------+
+| an        | ap_none | 4        |
+| seg       | ap_none | 8        |
+| value_r   | ap_none | 14       |
++-----------+---------+----------+
+
+* TOP LEVEL CONTROL
++-----------+--------------+--------+
+| Interface | Type         | Ports  |
++-----------+--------------+--------+
+| ap_clk    | clock        | ap_clk |
+| ap_rst    | reset        | ap_rst |
+| ap_ctrl   | ap_ctrl_none |        |
++-----------+--------------+--------+
+
+
+================================================================
+== SW I/O Information
+================================================================
+* Top Function Arguments
++----------+-----------+-------------+
+| Argument | Direction | Datatype    |
++----------+-----------+-------------+
+| value    | in        | ap_uint<14> |
+| seg      | out       | ap_uint<8>* |
+| an       | out       | ap_uint<4>* |
++----------+-----------+-------------+
+
+* SW-to-HW Mapping
++----------+--------------+---------+
+| Argument | HW Interface | HW Type |
++----------+--------------+---------+
+| value    | value_r      | port    |
+| seg      | seg          | port    |
+| an       | an           | port    |
++----------+--------------+---------+
+
+
+================================================================
+== Bind Op Report
+================================================================
++-------------------------+-----+--------+-------------+-----+--------+---------+
+| Name                    | DSP | Pragma | Variable    | Op  | Impl   | Latency |
++-------------------------+-----+--------+-------------+-----+--------+---------+
+| + seven_segment         | 0   |        |             |     |        |         |
+|   add_ln186_1_fu_211_p2 | -   |        | add_ln186_1 | add | fabric | 0       |
+|   add_ln186_fu_229_p2   | -   |        | add_ln186   | add | fabric | 0       |
++-------------------------+-----+--------+-------------+-----+--------+---------+
+
+
+================================================================
+== Bind Storage Report
+================================================================
+  No bind storage info in design
+
+================================================================
+== Pragma Report
+================================================================
+* Valid Pragma Syntax
++-----------+--------------------------+-----------------------------------------------------------------+
+| Type      | Options                  | Location                                                        |
++-----------+--------------------------+-----------------------------------------------------------------+
+| interface | ap_none port=value       | seven_segment_hls/seven_segment.cpp:60 in seven_segment, value  |
+| interface | ap_none port=seg         | seven_segment_hls/seven_segment.cpp:61 in seven_segment, seg    |
+| interface | ap_none port=an          | seven_segment_hls/seven_segment.cpp:62 in seven_segment, an     |
+| interface | ap_ctrl_none port=return | seven_segment_hls/seven_segment.cpp:63 in seven_segment, return |
+| pipeline  | II=1                     | seven_segment_hls/seven_segment.cpp:68 in seven_segment         |
++-----------+--------------------------+-----------------------------------------------------------------+
+
+

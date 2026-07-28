@@ -15,26 +15,26 @@
         <PipelineType>no</PipelineType>
         <SummaryOfTimingAnalysis>
             <unit>ns</unit>
-            <EstimatedClockPeriod>3.064</EstimatedClockPeriod>
+            <EstimatedClockPeriod>6.912</EstimatedClockPeriod>
         </SummaryOfTimingAnalysis>
         <SummaryOfOverallLatency>
             <unit>clock cycles</unit>
-            <Best-caseLatency>0</Best-caseLatency>
-            <Average-caseLatency>0</Average-caseLatency>
-            <Worst-caseLatency>0</Worst-caseLatency>
-            <Best-caseRealTimeLatency>0 ns</Best-caseRealTimeLatency>
-            <Average-caseRealTimeLatency>0 ns</Average-caseRealTimeLatency>
-            <Worst-caseRealTimeLatency>0 ns</Worst-caseRealTimeLatency>
-            <Interval-min>1</Interval-min>
-            <Interval-max>1</Interval-max>
+            <Best-caseLatency>2</Best-caseLatency>
+            <Average-caseLatency>20</Average-caseLatency>
+            <Worst-caseLatency>37</Worst-caseLatency>
+            <Best-caseRealTimeLatency>20.000 ns</Best-caseRealTimeLatency>
+            <Average-caseRealTimeLatency>0.200 us</Average-caseRealTimeLatency>
+            <Worst-caseRealTimeLatency>0.370 us</Worst-caseRealTimeLatency>
+            <Interval-min>3</Interval-min>
+            <Interval-max>38</Interval-max>
         </SummaryOfOverallLatency>
     </PerformanceEstimates>
     <AreaEstimates>
         <Resources>
             <BRAM_18K>0</BRAM_18K>
-            <FF>46</FF>
-            <LUT>113</LUT>
-            <DSP>0</DSP>
+            <DSP>1</DSP>
+            <FF>715</FF>
+            <LUT>768</LUT>
             <URAM>0</URAM>
         </Resources>
         <AvailableResources>
@@ -74,7 +74,7 @@
             <Type>scalar</Type>
             <IOProtocol>s_axi</IOProtocol>
             <Dir>in</Dir>
-            <Bits>5</Bits>
+            <Bits>6</Bits>
             <Attribute>unknown</Attribute>
             <CType>int</CType>
             <HasCtrl>1</HasCtrl>
@@ -151,7 +151,7 @@
             <Type>scalar</Type>
             <IOProtocol>s_axi</IOProtocol>
             <Dir>in</Dir>
-            <Bits>5</Bits>
+            <Bits>6</Bits>
             <Attribute>unknown</Attribute>
             <CType>int</CType>
             <HasCtrl>1</HasCtrl>
@@ -234,30 +234,6 @@
             <HasCtrl>1</HasCtrl>
         </RtlPorts>
         <RtlPorts>
-            <name>seg</name>
-            <Object>seg</Object>
-            <Type>pointer</Type>
-            <Scope/>
-            <IOProtocol>ap_none</IOProtocol>
-            <IOConfig/>
-            <Dir>out</Dir>
-            <Bits>8</Bits>
-            <Attribute>data</Attribute>
-            <CType>int</CType>
-        </RtlPorts>
-        <RtlPorts>
-            <name>an</name>
-            <Object>an</Object>
-            <Type>pointer</Type>
-            <Scope/>
-            <IOProtocol>ap_none</IOProtocol>
-            <IOConfig/>
-            <Dir>out</Dir>
-            <Bits>4</Bits>
-            <Attribute>data</Attribute>
-            <CType>int</CType>
-        </RtlPorts>
-        <RtlPorts>
             <name>ap_clk</name>
             <Object>seven_segment_axi</Object>
             <Type>return value</Type>
@@ -290,10 +266,35 @@
             <Bits>1</Bits>
             <Attribute>unknown</Attribute>
         </RtlPorts>
+        <RtlPorts>
+            <name>seg_tens</name>
+            <Object>seg_tens</Object>
+            <Type>pointer</Type>
+            <Scope/>
+            <IOProtocol>ap_none</IOProtocol>
+            <IOConfig/>
+            <Dir>out</Dir>
+            <Bits>8</Bits>
+            <Attribute>data</Attribute>
+            <CType>int</CType>
+        </RtlPorts>
+        <RtlPorts>
+            <name>seg_ones</name>
+            <Object>seg_ones</Object>
+            <Type>pointer</Type>
+            <Scope/>
+            <IOProtocol>ap_none</IOProtocol>
+            <IOConfig/>
+            <Dir>out</Dir>
+            <Bits>8</Bits>
+            <Attribute>data</Attribute>
+            <CType>int</CType>
+        </RtlPorts>
     </InterfaceSummary>
     <RTLDesignHierarchy>
-        <TopModule MAX_DEPTH="1">
+        <TopModule MAX_DEPTH="2">
             <ModuleName>seven_segment_axi</ModuleName>
+            <BindInstances>result_fu_212_p2 result_1_fu_222_p2 mul_7ns_34ns_40_2_1_U1</BindInstances>
         </TopModule>
     </RTLDesignHierarchy>
     <ModuleInformation>
@@ -303,16 +304,16 @@
                 <SummaryOfTimingAnalysis>
                     <TargetClockPeriod>10.00</TargetClockPeriod>
                     <ClockUncertainty>2.70</ClockUncertainty>
-                    <EstimatedClockPeriod>3.064</EstimatedClockPeriod>
+                    <EstimatedClockPeriod>6.912</EstimatedClockPeriod>
                 </SummaryOfTimingAnalysis>
                 <SummaryOfOverallLatency>
-                    <Best-caseLatency>0</Best-caseLatency>
-                    <Average-caseLatency>0</Average-caseLatency>
-                    <Worst-caseLatency>0</Worst-caseLatency>
-                    <Best-caseRealTimeLatency>0 ns</Best-caseRealTimeLatency>
-                    <Average-caseRealTimeLatency>0 ns</Average-caseRealTimeLatency>
-                    <Worst-caseRealTimeLatency>0 ns</Worst-caseRealTimeLatency>
-                    <PipelineInitiationInterval>1</PipelineInitiationInterval>
+                    <Best-caseLatency>2</Best-caseLatency>
+                    <Average-caseLatency>20</Average-caseLatency>
+                    <Worst-caseLatency>37</Worst-caseLatency>
+                    <Best-caseRealTimeLatency>20.000 ns</Best-caseRealTimeLatency>
+                    <Average-caseRealTimeLatency>0.200 us</Average-caseRealTimeLatency>
+                    <Worst-caseRealTimeLatency>0.370 us</Worst-caseRealTimeLatency>
+                    <PipelineInitiationInterval>3 ~ 38</PipelineInitiationInterval>
                     <PipelineType>no</PipelineType>
                 </SummaryOfOverallLatency>
             </PerformanceEstimates>
@@ -321,20 +322,25 @@
                     <BRAM_18K>0</BRAM_18K>
                     <AVAIL_BRAM>100</AVAIL_BRAM>
                     <UTIL_BRAM>0</UTIL_BRAM>
-                    <FF>46</FF>
-                    <AVAIL_FF>28800</AVAIL_FF>
-                    <UTIL_FF>~0</UTIL_FF>
-                    <LUT>113</LUT>
-                    <AVAIL_LUT>14400</AVAIL_LUT>
-                    <UTIL_LUT>~0</UTIL_LUT>
-                    <DSP>0</DSP>
+                    <DSP>1</DSP>
                     <AVAIL_DSP>66</AVAIL_DSP>
-                    <UTIL_DSP>0</UTIL_DSP>
+                    <UTIL_DSP>1</UTIL_DSP>
+                    <FF>715</FF>
+                    <AVAIL_FF>28800</AVAIL_FF>
+                    <UTIL_FF>2</UTIL_FF>
+                    <LUT>768</LUT>
+                    <AVAIL_LUT>14400</AVAIL_LUT>
+                    <UTIL_LUT>5</UTIL_LUT>
                     <URAM>0</URAM>
                     <AVAIL_URAM>0</AVAIL_URAM>
                     <UTIL_URAM>0</UTIL_URAM>
                 </Resources>
             </AreaEstimates>
+            <BindNodes>
+                <BindNode BINDTYPE="op" BRAM="0" BUNDLEDNAME="" DISPNAME="bind_op add" DSP="0" ID="" IMPL="fabric" LATENCY="0" LOOP="" OPTYPE="add" PRAGMA="" RTLNAME="result_fu_212_p2" SOURCE="lab2_task1_hls/seven_segment_axi.cpp:39" URAM="0" VARIABLE="result"/>
+                <BindNode BINDTYPE="op" BRAM="0" BUNDLEDNAME="" DISPNAME="bind_op sub" DSP="0" ID="" IMPL="fabric" LATENCY="0" LOOP="" OPTYPE="sub" PRAGMA="" RTLNAME="result_1_fu_222_p2" SOURCE="lab2_task1_hls/seven_segment_axi.cpp:40" URAM="0" VARIABLE="result_1"/>
+                <BindNode BINDTYPE="op" BRAM="0" BUNDLEDNAME="" DISPNAME="bind_op mul" DSP="1" ID="" IMPL="auto" LATENCY="1" LOOP="" OPTYPE="mul" PRAGMA="" RTLNAME="mul_7ns_34ns_40_2_1_U1" SOURCE="lab2_task1_hls/seven_segment_axi.cpp:38" URAM="0" VARIABLE="mul"/>
+            </BindNodes>
         </Module>
     </ModuleInformation>
     <FIFOInformation/>
@@ -342,24 +348,34 @@
         <config_export description="AXI4-Lite controlled seven-segment display HLS IP" display_name="seven_segment_axi" library="hls" taxonomy="/UserIP" vendor="ces.kit.edu" version="1.0"/>
     </UserConfigCommands>
     <Args>
-        <Arg ArgName="digit" index="0" direction="in" srcType="ap_uint&lt;4&gt;" srcSize="8">
+        <Arg ArgName="op1" index="0" direction="in" srcType="ap_uint&lt;7&gt;" srcSize="8">
             <hwRefs>
-                <hwRef type="register" interface="s_axi_CTRL" name="digit" usage="data" direction="in"/>
+                <hwRef type="register" interface="s_axi_CTRL" name="op1" usage="data" direction="in"/>
             </hwRefs>
         </Arg>
-        <Arg ArgName="seg" index="1" direction="out" srcType="ap_uint&lt;8&gt;*" srcSize="8">
+        <Arg ArgName="op2" index="1" direction="in" srcType="ap_uint&lt;7&gt;" srcSize="8">
             <hwRefs>
-                <hwRef type="port" interface="seg" name="seg" usage="data" direction="out"/>
+                <hwRef type="register" interface="s_axi_CTRL" name="op2" usage="data" direction="in"/>
             </hwRefs>
         </Arg>
-        <Arg ArgName="an" index="2" direction="out" srcType="ap_uint&lt;4&gt;*" srcSize="8">
+        <Arg ArgName="op_sel" index="2" direction="in" srcType="ap_uint&lt;2&gt;" srcSize="8">
             <hwRefs>
-                <hwRef type="port" interface="an" name="an" usage="data" direction="out"/>
+                <hwRef type="register" interface="s_axi_CTRL" name="op_sel" usage="data" direction="in"/>
+            </hwRefs>
+        </Arg>
+        <Arg ArgName="seg_tens" index="3" direction="out" srcType="ap_uint&lt;8&gt;*" srcSize="8">
+            <hwRefs>
+                <hwRef type="port" interface="seg_tens" name="seg_tens" usage="data" direction="out"/>
+            </hwRefs>
+        </Arg>
+        <Arg ArgName="seg_ones" index="4" direction="out" srcType="ap_uint&lt;8&gt;*" srcSize="8">
+            <hwRefs>
+                <hwRef type="port" interface="seg_ones" name="seg_ones" usage="data" direction="out"/>
             </hwRefs>
         </Arg>
     </Args>
     <Interfaces>
-        <Interface InterfaceName="s_axi_CTRL" type="axi4lite" busTypeName="aximm" mode="slave" dataWidth="32" addrWidth="5" portPrefix="s_axi_CTRL_" paramPrefix="C_S_AXI_CTRL_">
+        <Interface InterfaceName="s_axi_CTRL" type="axi4lite" busTypeName="aximm" mode="slave" dataWidth="32" addrWidth="6" portPrefix="s_axi_CTRL_" paramPrefix="C_S_AXI_CTRL_">
             <ports>
                 <port>s_axi_CTRL_ARADDR</port>
                 <port>s_axi_CTRL_ARREADY</port>
@@ -413,37 +429,29 @@
                         <field offset="2" width="30" name="RESERVED_0" access="R" description="Reserved.  0s on read."/>
                     </fields>
                 </register>
-                <register offset="0x10" name="digit" access="W" description="Data signal of digit" range="32">
+                <register offset="0x10" name="op1" access="W" description="Data signal of op1" range="32">
                     <fields>
-                        <field offset="0" width="4" name="digit" access="W" description="Bit 3 to 0 of digit"/>
-                        <field offset="4" width="28" name="RESERVED" access="R" description="Reserved.  0s on read."/>
+                        <field offset="0" width="7" name="op1" access="W" description="Bit 6 to 0 of op1"/>
+                        <field offset="7" width="25" name="RESERVED" access="R" description="Reserved.  0s on read."/>
+                    </fields>
+                </register>
+                <register offset="0x18" name="op2" access="W" description="Data signal of op2" range="32">
+                    <fields>
+                        <field offset="0" width="7" name="op2" access="W" description="Bit 6 to 0 of op2"/>
+                        <field offset="7" width="25" name="RESERVED" access="R" description="Reserved.  0s on read."/>
+                    </fields>
+                </register>
+                <register offset="0x20" name="op_sel" access="W" description="Data signal of op_sel" range="32">
+                    <fields>
+                        <field offset="0" width="2" name="op_sel" access="W" description="Bit 1 to 0 of op_sel"/>
+                        <field offset="2" width="30" name="RESERVED" access="R" description="Reserved.  0s on read."/>
                     </fields>
                 </register>
             </registers>
             <constraints>
-                <constraint constraint_type="pragma interface" mode="s_axilite" register_option="0" offset="16" argName="digit"/>
-            </constraints>
-        </Interface>
-        <Interface InterfaceName="seg" type="data" busTypeName="data" protocol="ap_none" mode="master" dataWidth="8">
-            <portMaps>
-                <portMap portMapName="seg">DATA</portMap>
-            </portMaps>
-            <ports>
-                <port>seg</port>
-            </ports>
-            <constraints>
-                <constraint constraint_type="pragma interface" mode="ap_none" register_option="0" argName="seg"/>
-            </constraints>
-        </Interface>
-        <Interface InterfaceName="an" type="data" busTypeName="data" protocol="ap_none" mode="master" dataWidth="4">
-            <portMaps>
-                <portMap portMapName="an">DATA</portMap>
-            </portMaps>
-            <ports>
-                <port>an</port>
-            </ports>
-            <constraints>
-                <constraint constraint_type="pragma interface" mode="ap_none" register_option="0" argName="an"/>
+                <constraint constraint_type="pragma interface" mode="s_axilite" register_option="0" offset="16" argName="op1"/>
+                <constraint constraint_type="pragma interface" mode="s_axilite" register_option="0" offset="24" argName="op2"/>
+                <constraint constraint_type="pragma interface" mode="s_axilite" register_option="0" offset="32" argName="op_sel"/>
             </constraints>
         </Interface>
         <Interface InterfaceName="ap_clk" type="clock" busTypeName="clock" mode="slave">
@@ -480,13 +488,35 @@
                 <port>interrupt</port>
             </ports>
         </Interface>
+        <Interface InterfaceName="seg_tens" type="data" busTypeName="data" protocol="ap_none" mode="master" dataWidth="8">
+            <portMaps>
+                <portMap portMapName="seg_tens">DATA</portMap>
+            </portMaps>
+            <ports>
+                <port>seg_tens</port>
+            </ports>
+            <constraints>
+                <constraint constraint_type="pragma interface" mode="ap_none" register_option="0" argName="seg_tens"/>
+            </constraints>
+        </Interface>
+        <Interface InterfaceName="seg_ones" type="data" busTypeName="data" protocol="ap_none" mode="master" dataWidth="8">
+            <portMaps>
+                <portMap portMapName="seg_ones">DATA</portMap>
+            </portMaps>
+            <ports>
+                <port>seg_ones</port>
+            </ports>
+            <constraints>
+                <constraint constraint_type="pragma interface" mode="ap_none" register_option="0" argName="seg_ones"/>
+            </constraints>
+        </Interface>
     </Interfaces>
     <ReportHWInterface>
         <section name="HW Interfaces" level="0">
             <item name="S_AXILITE Interfaces">
                 <table isCollapsed="0">
                     <keys size="5">Interface, Data Width, Address Width, Offset, Register</keys>
-                    <column name="s_axi_CTRL">32, 5, 16, 0, , , , , </column>
+                    <column name="s_axi_CTRL">32, 6, 16, 0, , , , , </column>
                 </table>
             </item>
             <item name="S_AXILITE Registers">
@@ -496,14 +526,16 @@
                     <column name="s_axi_CTRL">GIER, 0x04, 32, RW, Global Interrupt Enable Register, 0=Enable</column>
                     <column name="s_axi_CTRL">IP_IER, 0x08, 32, RW, IP Interrupt Enable Register, 0=CHAN0_INT_EN 1=CHAN1_INT_EN</column>
                     <column name="s_axi_CTRL">IP_ISR, 0x0c, 32, RW, IP Interrupt Status Register, 0=CHAN0_INT_ST 1=CHAN1_INT_ST</column>
-                    <column name="s_axi_CTRL">digit, 0x10, 32, W, Data signal of digit, </column>
+                    <column name="s_axi_CTRL">op1, 0x10, 32, W, Data signal of op1, </column>
+                    <column name="s_axi_CTRL">op2, 0x18, 32, W, Data signal of op2, </column>
+                    <column name="s_axi_CTRL">op_sel, 0x20, 32, W, Data signal of op_sel, </column>
                 </table>
             </item>
             <item name="Other Ports">
                 <table isCollapsed="0">
                     <keys size="3">Interface, Mode, Bitwidth</keys>
-                    <column name="an">ap_none, 4, , </column>
-                    <column name="seg">ap_none, 8, , </column>
+                    <column name="seg_ones">ap_none, 8, , </column>
+                    <column name="seg_tens">ap_none, 8, , </column>
                 </table>
             </item>
             <item name="TOP LEVEL CONTROL">
@@ -522,26 +554,32 @@
             <item name="Top Function Arguments">
                 <table isCollapsed="1">
                     <keys size="3">Argument, Direction, Datatype</keys>
-                    <column name="digit">in, ap_uint&lt;4&gt;</column>
-                    <column name="seg">out, ap_uint&lt;8&gt;*</column>
-                    <column name="an">out, ap_uint&lt;4&gt;*</column>
+                    <column name="op1">in, ap_uint&lt;7&gt;</column>
+                    <column name="op2">in, ap_uint&lt;7&gt;</column>
+                    <column name="op_sel">in, ap_uint&lt;2&gt;</column>
+                    <column name="seg_tens">out, ap_uint&lt;8&gt;*</column>
+                    <column name="seg_ones">out, ap_uint&lt;8&gt;*</column>
                 </table>
             </item>
             <item name="SW-to-HW Mapping">
                 <table isCollapsed="1">
                     <keys size="4">Argument, HW Interface, HW Type, HW Info</keys>
-                    <column name="digit">s_axi_CTRL, register, name=digit offset=0x10 range=32, </column>
-                    <column name="seg">seg, port, , </column>
-                    <column name="an">an, port, , </column>
+                    <column name="op1">s_axi_CTRL, register, name=op1 offset=0x10 range=32, </column>
+                    <column name="op2">s_axi_CTRL, register, name=op2 offset=0x18 range=32, </column>
+                    <column name="op_sel">s_axi_CTRL, register, name=op_sel offset=0x20 range=32, </column>
+                    <column name="seg_tens">seg_tens, port, , </column>
+                    <column name="seg_ones">seg_ones, port, , </column>
                 </table>
             </item>
         </section>
     </ReportSWInterface>
     <PragmaReport>
-        <Pragma type="interface" location="lab2_task1_hls/seven_segment_axi.cpp:4" status="valid" parentFunction="seven_segment_axi" variable="digit" isDirective="0" options="s_axilite port=digit bundle=CTRL"/>
-        <Pragma type="interface" location="lab2_task1_hls/seven_segment_axi.cpp:5" status="valid" parentFunction="seven_segment_axi" variable="seg" isDirective="0" options="ap_none port=seg"/>
-        <Pragma type="interface" location="lab2_task1_hls/seven_segment_axi.cpp:6" status="valid" parentFunction="seven_segment_axi" variable="an" isDirective="0" options="ap_none port=an"/>
-        <Pragma type="interface" location="lab2_task1_hls/seven_segment_axi.cpp:7" status="valid" parentFunction="seven_segment_axi" variable="return" isDirective="0" options="s_axilite port=return bundle=CTRL"/>
+        <Pragma type="interface" location="lab2_task1_hls/seven_segment_axi.cpp:29" status="valid" parentFunction="seven_segment_axi" variable="op1" isDirective="0" options="s_axilite port=op1 bundle=CTRL"/>
+        <Pragma type="interface" location="lab2_task1_hls/seven_segment_axi.cpp:30" status="valid" parentFunction="seven_segment_axi" variable="op2" isDirective="0" options="s_axilite port=op2 bundle=CTRL"/>
+        <Pragma type="interface" location="lab2_task1_hls/seven_segment_axi.cpp:31" status="valid" parentFunction="seven_segment_axi" variable="op_sel" isDirective="0" options="s_axilite port=op_sel bundle=CTRL"/>
+        <Pragma type="interface" location="lab2_task1_hls/seven_segment_axi.cpp:32" status="valid" parentFunction="seven_segment_axi" variable="seg_tens" isDirective="0" options="ap_none port=seg_tens"/>
+        <Pragma type="interface" location="lab2_task1_hls/seven_segment_axi.cpp:33" status="valid" parentFunction="seven_segment_axi" variable="seg_ones" isDirective="0" options="ap_none port=seg_ones"/>
+        <Pragma type="interface" location="lab2_task1_hls/seven_segment_axi.cpp:34" status="valid" parentFunction="seven_segment_axi" variable="return" isDirective="0" options="s_axilite port=return bundle=CTRL"/>
     </PragmaReport>
 </profile>
 

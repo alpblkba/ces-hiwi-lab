@@ -1,7 +1,7 @@
 {
   "design": {
     "design_info": {
-      "boundary_crc": "0xDFA262A7ABDD45",
+      "boundary_crc": "0xDFA26238C02A85",
       "device": "xc7z007sclg400-1",
       "gen_directory": "../../../../lab2_task1.gen/sources_1/bd/seven_segment",
       "name": "seven_segment",
@@ -12,13 +12,13 @@
     },
     "design_tree": {
       "processing_system7_0": "",
-      "seven_segment_axi_0": "",
       "ps7_0_axi_periph": {
         "s00_couplers": {
           "auto_pc": ""
         }
       },
-      "rst_ps7_0_50M": ""
+      "rst_ps7_0_50M": "",
+      "seven_segment_axi_0": ""
     },
     "interface_ports": {
       "DDR": {
@@ -358,12 +358,6 @@
           }
         }
       },
-      "seven_segment_axi_0": {
-        "vlnv": "ces.kit.edu:hls:seven_segment_axi:1.0",
-        "xci_name": "seven_segment_seven_segment_axi_0_0",
-        "xci_path": "ip/seven_segment_seven_segment_axi_0_0/seven_segment_seven_segment_axi_0_0.xci",
-        "inst_hier_path": "seven_segment_axi_0"
-      },
       "ps7_0_axi_periph": {
         "vlnv": "xilinx.com:ip:axi_interconnect:2.1",
         "xci_path": "ip/seven_segment_ps7_0_axi_periph_0/seven_segment_ps7_0_axi_periph_0.xci",
@@ -582,6 +576,12 @@
         "xci_name": "seven_segment_rst_ps7_0_50M_0",
         "xci_path": "ip/seven_segment_rst_ps7_0_50M_0/seven_segment_rst_ps7_0_50M_0.xci",
         "inst_hier_path": "rst_ps7_0_50M"
+      },
+      "seven_segment_axi_0": {
+        "vlnv": "ces.kit.edu:hls:seven_segment_axi:1.0",
+        "xci_name": "seven_segment_seven_segment_axi_0_0",
+        "xci_path": "ip/seven_segment_seven_segment_axi_0_0/seven_segment_seven_segment_axi_0_0.xci",
+        "inst_hier_path": "seven_segment_axi_0"
       }
     },
     "interface_nets": {
@@ -617,9 +617,9 @@
           "processing_system7_0/M_AXI_GP0_ACLK",
           "ps7_0_axi_periph/S00_ACLK",
           "rst_ps7_0_50M/slowest_sync_clk",
-          "seven_segment_axi_0/ap_clk",
           "ps7_0_axi_periph/M00_ACLK",
-          "ps7_0_axi_periph/ACLK"
+          "ps7_0_axi_periph/ACLK",
+          "seven_segment_axi_0/ap_clk"
         ]
       },
       "processing_system7_0_FCLK_RESET0_N": {
@@ -632,20 +632,18 @@
         "ports": [
           "rst_ps7_0_50M/peripheral_aresetn",
           "ps7_0_axi_periph/S00_ARESETN",
-          "seven_segment_axi_0/ap_rst_n",
           "ps7_0_axi_periph/M00_ARESETN",
-          "ps7_0_axi_periph/ARESETN"
+          "ps7_0_axi_periph/ARESETN",
+          "seven_segment_axi_0/ap_rst_n"
         ]
       },
       "seven_segment_axi_0_an": {
         "ports": [
-          "seven_segment_axi_0/an",
           "an"
         ]
       },
       "seven_segment_axi_0_seg": {
         "ports": [
-          "seven_segment_axi_0/seg",
           "seg"
         ]
       }

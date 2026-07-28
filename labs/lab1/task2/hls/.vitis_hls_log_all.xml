@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vivadoHLSLog:LogRoot xmlns:vivadoHLSLog="www.xilinx.com/vivadoHLSLog">
+  <errorLogs>
+    <logs>
+      <synLog/>
+      <simLog/>
+      <mgLog/>
+      <packageLog/>
+      <csimLog/>
+    </logs>
+  </errorLogs>
+  <warningLogs>
+    <logs>
+      <synLog>
+        <logs message="WARNING: [RTGEN 206-101] Port 'seg_ones' with mode 'ap_none' may require an associated data valid signal to correctly communicate with other blocks or a test bench; automatic C/RTL co-simulation may not be able to verify such a port." projectName="seven_segment_hls" solutionName="solution1" date="2026-07-28T13:49:42.737+0200" type="Warning"/>
+        <logs message="WARNING: [RTGEN 206-101] Port 'seg_tens' with mode 'ap_none' may require an associated data valid signal to correctly communicate with other blocks or a test bench; automatic C/RTL co-simulation may not be able to verify such a port." projectName="seven_segment_hls" solutionName="solution1" date="2026-07-28T13:49:42.733+0200" type="Warning"/>
+        <logs message="WARNING: [HLS 200-40] Cannot find source file seven_segment.cpp; skipping it." projectName="seven_segment_hls" solutionName="solution1" date="2026-07-28T13:49:37.831+0200" type="Warning"/>
+        <logs message="WARNING: [HLS 200-40] Cannot find test bench file 'seven_segment_tb.cpp'" projectName="seven_segment_hls" solutionName="solution1" date="2026-07-28T13:49:25.761+0200" type="Warning"/>
+        <logs message="WARNING: [HLS 200-40] Cannot find design file 'seven_segment.cpp'" projectName="seven_segment_hls" solutionName="solution1" date="2026-07-28T13:49:25.757+0200" type="Warning"/>
+      </synLog>
+      <simLog/>
+      <mgLog/>
+      <packageLog>
+        <logs message="WARNING: [HLS 200-40] Cannot find test bench file 'seven_segment_tb.cpp'" projectName="seven_segment_hls" solutionName="solution1" date="2026-07-28T13:52:47.920+0200" type="Warning"/>
+        <logs message="WARNING: [HLS 200-40] Cannot find design file 'seven_segment.cpp'" projectName="seven_segment_hls" solutionName="solution1" date="2026-07-28T13:52:47.916+0200" type="Warning"/>
+      </packageLog>
+      <csimLog>
+        <logs message="WARNING: [HLS 200-40] Cannot find test bench file 'seven_segment_tb.cpp'" projectName="seven_segment_hls" solutionName="solution1" date="2026-07-28T14:48:05.201+0200" type="Warning"/>
+        <logs message="WARNING: [HLS 200-40] Cannot find design file 'seven_segment.cpp'" projectName="seven_segment_hls" solutionName="solution1" date="2026-07-28T14:48:05.197+0200" type="Warning"/>
+      </csimLog>
+    </logs>
+  </warningLogs>
+</vivadoHLSLog:LogRoot>

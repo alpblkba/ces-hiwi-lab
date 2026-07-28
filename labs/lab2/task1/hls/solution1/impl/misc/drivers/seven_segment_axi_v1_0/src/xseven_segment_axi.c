@@ -74,20 +74,54 @@ void XSeven_segment_axi_DisableAutoRestart(XSeven_segment_axi *InstancePtr) {
     XSeven_segment_axi_WriteReg(InstancePtr->Ctrl_BaseAddress, XSEVEN_SEGMENT_AXI_CTRL_ADDR_AP_CTRL, 0);
 }
 
-void XSeven_segment_axi_Set_digit(XSeven_segment_axi *InstancePtr, u32 Data) {
+void XSeven_segment_axi_Set_op1(XSeven_segment_axi *InstancePtr, u32 Data) {
     Xil_AssertVoid(InstancePtr != NULL);
     Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
 
-    XSeven_segment_axi_WriteReg(InstancePtr->Ctrl_BaseAddress, XSEVEN_SEGMENT_AXI_CTRL_ADDR_DIGIT_DATA, Data);
+    XSeven_segment_axi_WriteReg(InstancePtr->Ctrl_BaseAddress, XSEVEN_SEGMENT_AXI_CTRL_ADDR_OP1_DATA, Data);
 }
 
-u32 XSeven_segment_axi_Get_digit(XSeven_segment_axi *InstancePtr) {
+u32 XSeven_segment_axi_Get_op1(XSeven_segment_axi *InstancePtr) {
     u32 Data;
 
     Xil_AssertNonvoid(InstancePtr != NULL);
     Xil_AssertNonvoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
 
-    Data = XSeven_segment_axi_ReadReg(InstancePtr->Ctrl_BaseAddress, XSEVEN_SEGMENT_AXI_CTRL_ADDR_DIGIT_DATA);
+    Data = XSeven_segment_axi_ReadReg(InstancePtr->Ctrl_BaseAddress, XSEVEN_SEGMENT_AXI_CTRL_ADDR_OP1_DATA);
+    return Data;
+}
+
+void XSeven_segment_axi_Set_op2(XSeven_segment_axi *InstancePtr, u32 Data) {
+    Xil_AssertVoid(InstancePtr != NULL);
+    Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
+
+    XSeven_segment_axi_WriteReg(InstancePtr->Ctrl_BaseAddress, XSEVEN_SEGMENT_AXI_CTRL_ADDR_OP2_DATA, Data);
+}
+
+u32 XSeven_segment_axi_Get_op2(XSeven_segment_axi *InstancePtr) {
+    u32 Data;
+
+    Xil_AssertNonvoid(InstancePtr != NULL);
+    Xil_AssertNonvoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
+
+    Data = XSeven_segment_axi_ReadReg(InstancePtr->Ctrl_BaseAddress, XSEVEN_SEGMENT_AXI_CTRL_ADDR_OP2_DATA);
+    return Data;
+}
+
+void XSeven_segment_axi_Set_op_sel(XSeven_segment_axi *InstancePtr, u32 Data) {
+    Xil_AssertVoid(InstancePtr != NULL);
+    Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
+
+    XSeven_segment_axi_WriteReg(InstancePtr->Ctrl_BaseAddress, XSEVEN_SEGMENT_AXI_CTRL_ADDR_OP_SEL_DATA, Data);
+}
+
+u32 XSeven_segment_axi_Get_op_sel(XSeven_segment_axi *InstancePtr) {
+    u32 Data;
+
+    Xil_AssertNonvoid(InstancePtr != NULL);
+    Xil_AssertNonvoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
+
+    Data = XSeven_segment_axi_ReadReg(InstancePtr->Ctrl_BaseAddress, XSEVEN_SEGMENT_AXI_CTRL_ADDR_OP_SEL_DATA);
     return Data;
 }
 

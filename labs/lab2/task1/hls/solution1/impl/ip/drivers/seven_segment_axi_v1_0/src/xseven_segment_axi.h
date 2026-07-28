@@ -88,8 +88,12 @@ u32 XSeven_segment_axi_IsReady(XSeven_segment_axi *InstancePtr);
 void XSeven_segment_axi_EnableAutoRestart(XSeven_segment_axi *InstancePtr);
 void XSeven_segment_axi_DisableAutoRestart(XSeven_segment_axi *InstancePtr);
 
-void XSeven_segment_axi_Set_digit(XSeven_segment_axi *InstancePtr, u32 Data);
-u32 XSeven_segment_axi_Get_digit(XSeven_segment_axi *InstancePtr);
+void XSeven_segment_axi_Set_op1(XSeven_segment_axi *InstancePtr, u32 Data);
+u32 XSeven_segment_axi_Get_op1(XSeven_segment_axi *InstancePtr);
+void XSeven_segment_axi_Set_op2(XSeven_segment_axi *InstancePtr, u32 Data);
+u32 XSeven_segment_axi_Get_op2(XSeven_segment_axi *InstancePtr);
+void XSeven_segment_axi_Set_op_sel(XSeven_segment_axi *InstancePtr, u32 Data);
+u32 XSeven_segment_axi_Get_op_sel(XSeven_segment_axi *InstancePtr);
 
 void XSeven_segment_axi_InterruptGlobalEnable(XSeven_segment_axi *InstancePtr);
 void XSeven_segment_axi_InterruptGlobalDisable(XSeven_segment_axi *InstancePtr);

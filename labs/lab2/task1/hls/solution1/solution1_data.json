@@ -15,41 +15,67 @@
     "Triple": "fpga64-xilinx-none"
   },
   "Args": {
-    "digit": {
+    "op1": {
       "index": "0",
       "direction": "in",
-      "srcType": "ap_uint<4>",
+      "srcType": "ap_uint<7>",
       "srcSize": "8",
       "hwRefs": [{
           "type": "register",
           "interface": "s_axi_CTRL",
-          "name": "digit",
+          "name": "op1",
           "usage": "data",
           "direction": "in"
         }]
     },
-    "seg": {
+    "op2": {
       "index": "1",
+      "direction": "in",
+      "srcType": "ap_uint<7>",
+      "srcSize": "8",
+      "hwRefs": [{
+          "type": "register",
+          "interface": "s_axi_CTRL",
+          "name": "op2",
+          "usage": "data",
+          "direction": "in"
+        }]
+    },
+    "op_sel": {
+      "index": "2",
+      "direction": "in",
+      "srcType": "ap_uint<2>",
+      "srcSize": "8",
+      "hwRefs": [{
+          "type": "register",
+          "interface": "s_axi_CTRL",
+          "name": "op_sel",
+          "usage": "data",
+          "direction": "in"
+        }]
+    },
+    "seg_tens": {
+      "index": "3",
       "direction": "out",
       "srcType": "ap_uint<8>*",
       "srcSize": "8",
       "hwRefs": [{
           "type": "port",
-          "interface": "seg",
-          "name": "seg",
+          "interface": "seg_tens",
+          "name": "seg_tens",
           "usage": "data",
           "direction": "out"
         }]
     },
-    "an": {
-      "index": "2",
+    "seg_ones": {
+      "index": "4",
       "direction": "out",
-      "srcType": "ap_uint<4>*",
+      "srcType": "ap_uint<8>*",
       "srcSize": "8",
       "hwRefs": [{
           "type": "port",
-          "interface": "an",
-          "name": "an",
+          "interface": "seg_ones",
+          "name": "seg_ones",
           "usage": "data",
           "direction": "out"
         }]
@@ -76,20 +102,18 @@
     "ClockName": "ap_clk",
     "ClockPeriod": "10",
     "Uncertainty": "2.7",
-    "IsCombinational": "1",
-    "II": "1",
-    "Latency": "0"
+    "IsCombinational": "0",
+    "II": "3 ~ 38",
+    "Latency": "2"
   },
-  "Xdc": {
-    
-  },
+  "Xdc": {"OocClocks": ["create_clock -name ap_clk -period 10.000 [get_ports ap_clk]"]},
   "Ipx": {
     "Vendor": "ces.kit.edu",
     "Library": "hls",
     "Name": "seven_segment_axi",
     "Version": "1.0",
     "DisplayName": "seven_segment_axi",
-    "Revision": "2114674705",
+    "Revision": "2114716528",
     "Description": "AXI4-Lite controlled seven-segment display HLS IP",
     "Taxonomy": "\/UserIP",
     "AutoFamilySupport": "",
@@ -99,12 +123,16 @@
     "CSource": ["..\/seven_segment_axi.cpp"],
     "Vhdl": [
       "impl\/vhdl\/seven_segment_axi_CTRL_s_axi.vhd",
+      "impl\/vhdl\/seven_segment_axi_mul_7ns_34ns_40_2_1.vhd",
       "impl\/vhdl\/seven_segment_axi_mux_164_7_1_1.vhd",
+      "impl\/vhdl\/seven_segment_axi_urem_32s_5ns_4_36_seq_1.vhd",
       "impl\/vhdl\/seven_segment_axi.vhd"
     ],
     "Verilog": [
       "impl\/verilog\/seven_segment_axi_CTRL_s_axi.v",
+      "impl\/verilog\/seven_segment_axi_mul_7ns_34ns_40_2_1.v",
       "impl\/verilog\/seven_segment_axi_mux_164_7_1_1.v",
+      "impl\/verilog\/seven_segment_axi_urem_32s_5ns_4_36_seq_1.v",
       "impl\/verilog\/seven_segment_axi.v"
     ],
     "SwDriver": [
@@ -136,7 +164,7 @@
       "busTypeName": "aximm",
       "mode": "slave",
       "dataWidth": "32",
-      "addrWidth": "5",
+      "addrWidth": "6",
       "portPrefix": "s_axi_CTRL_",
       "paramPrefix": "C_S_AXI_CTRL_",
       "ports": [
@@ -316,21 +344,67 @@
         },
         {
           "offset": "0x10",
-          "name": "digit",
+          "name": "op1",
           "access": "W",
-          "description": "Data signal of digit",
+          "description": "Data signal of op1",
           "range": "32",
           "fields": [
             {
               "offset": "0",
-              "width": "4",
-              "name": "digit",
+              "width": "7",
+              "name": "op1",
               "access": "W",
-              "description": "Bit 3 to 0 of digit"
+              "description": "Bit 6 to 0 of op1"
             },
             {
-              "offset": "4",
-              "width": "28",
+              "offset": "7",
+              "width": "25",
+              "name": "RESERVED",
+              "access": "R",
+              "description": "Reserved.  0s on read."
+            }
+          ]
+        },
+        {
+          "offset": "0x18",
+          "name": "op2",
+          "access": "W",
+          "description": "Data signal of op2",
+          "range": "32",
+          "fields": [
+            {
+              "offset": "0",
+              "width": "7",
+              "name": "op2",
+              "access": "W",
+              "description": "Bit 6 to 0 of op2"
+            },
+            {
+              "offset": "7",
+              "width": "25",
+              "name": "RESERVED",
+              "access": "R",
+              "description": "Reserved.  0s on read."
+            }
+          ]
+        },
+        {
+          "offset": "0x20",
+          "name": "op_sel",
+          "access": "W",
+          "description": "Data signal of op_sel",
+          "range": "32",
+          "fields": [
+            {
+              "offset": "0",
+              "width": "2",
+              "name": "op_sel",
+              "access": "W",
+              "description": "Bit 1 to 0 of op_sel"
+            },
+            {
+              "offset": "2",
+              "width": "30",
               "name": "RESERVED",
               "access": "R",
               "description": "Reserved.  0s on read."
@@ -338,43 +412,29 @@
           ]
         }
       ],
-      "constraints": [{
+      "constraints": [
+        {
           "constraint_type": "pragma interface",
           "mode": "s_axilite",
           "register_option": "0",
           "offset": "16",
-          "argName": "digit"
-        }]
-    },
-    "seg": {
-      "type": "data",
-      "busTypeName": "data",
-      "protocol": "ap_none",
-      "mode": "master",
-      "dataWidth": "8",
-      "portMap": {"seg": "DATA"},
-      "ports": ["seg"],
-      "constraints": [{
+          "argName": "op1"
+        },
+        {
           "constraint_type": "pragma interface",
-          "mode": "ap_none",
+          "mode": "s_axilite",
           "register_option": "0",
-          "argName": "seg"
-        }]
-    },
-    "an": {
-      "type": "data",
-      "busTypeName": "data",
-      "protocol": "ap_none",
-      "mode": "master",
-      "dataWidth": "4",
-      "portMap": {"an": "DATA"},
-      "ports": ["an"],
-      "constraints": [{
+          "offset": "24",
+          "argName": "op2"
+        },
+        {
           "constraint_type": "pragma interface",
-          "mode": "ap_none",
+          "mode": "s_axilite",
           "register_option": "0",
-          "argName": "an"
-        }]
+          "offset": "32",
+          "argName": "op_sel"
+        }
+      ]
     },
     "ap_clk": {
       "type": "clock",
@@ -403,6 +463,36 @@
       "busParams": {"SENSITIVITY": "LEVEL_HIGH"},
       "portMap": {"interrupt": "INTERRUPT"},
       "ports": ["interrupt"]
+    },
+    "seg_tens": {
+      "type": "data",
+      "busTypeName": "data",
+      "protocol": "ap_none",
+      "mode": "master",
+      "dataWidth": "8",
+      "portMap": {"seg_tens": "DATA"},
+      "ports": ["seg_tens"],
+      "constraints": [{
+          "constraint_type": "pragma interface",
+          "mode": "ap_none",
+          "register_option": "0",
+          "argName": "seg_tens"
+        }]
+    },
+    "seg_ones": {
+      "type": "data",
+      "busTypeName": "data",
+      "protocol": "ap_none",
+      "mode": "master",
+      "dataWidth": "8",
+      "portMap": {"seg_ones": "DATA"},
+      "ports": ["seg_ones"],
+      "constraints": [{
+          "constraint_type": "pragma interface",
+          "mode": "ap_none",
+          "register_option": "0",
+          "argName": "seg_ones"
+        }]
     }
   },
   "RtlPorts": {
@@ -416,7 +506,7 @@
     },
     "s_axi_CTRL_AWADDR": {
       "dir": "in",
-      "width": "5"
+      "width": "6"
     },
     "s_axi_CTRL_WVALID": {
       "dir": "in",
@@ -444,7 +534,7 @@
     },
     "s_axi_CTRL_ARADDR": {
       "dir": "in",
-      "width": "5"
+      "width": "6"
     },
     "s_axi_CTRL_RVALID": {
       "dir": "out",
@@ -474,14 +564,6 @@
       "dir": "out",
       "width": "2"
     },
-    "seg": {
-      "dir": "out",
-      "width": "8"
-    },
-    "an": {
-      "dir": "out",
-      "width": "4"
-    },
     "ap_clk": {
       "dir": "in",
       "width": "1"
@@ -493,6 +575,14 @@
     "interrupt": {
       "dir": "out",
       "width": "1"
+    },
+    "seg_tens": {
+      "dir": "out",
+      "width": "8"
+    },
+    "seg_ones": {
+      "dir": "out",
+      "width": "8"
     }
   },
   "ModuleInfo": {
@@ -501,36 +591,38 @@
         "FunctionProtocol": "ap_ctrl_hs",
         "isTaskLevelControl": "0",
         "isPipelined": "0",
-        "isCombinational": "1",
+        "isCombinational": "0",
         "isOneStateSeq": "0"
       }},
     "Metrics": {"seven_segment_axi": {
         "Latency": {
-          "LatencyBest": "0",
-          "LatencyAvg": "0",
-          "LatencyWorst": "0",
-          "PipelineII": "1",
+          "LatencyBest": "2",
+          "LatencyAvg": "20",
+          "LatencyWorst": "37",
+          "PipelineIIMin": "3",
+          "PipelineIIMax": "38",
+          "PipelineII": "3 ~ 38",
           "PipelineDepth": "",
           "PipelineType": "no"
         },
         "Timing": {
           "Target": "10.00",
           "Uncertainty": "2.70",
-          "Estimate": "3.064"
+          "Estimate": "6.912"
         },
         "Area": {
           "BRAM_18K": "0",
           "AVAIL_BRAM": "100",
           "UTIL_BRAM": "0",
-          "FF": "46",
-          "AVAIL_FF": "28800",
-          "UTIL_FF": "~0",
-          "LUT": "113",
-          "AVAIL_LUT": "14400",
-          "UTIL_LUT": "~0",
-          "DSP": "0",
+          "DSP": "1",
           "AVAIL_DSP": "66",
-          "UTIL_DSP": "0",
+          "UTIL_DSP": "1",
+          "FF": "715",
+          "AVAIL_FF": "28800",
+          "UTIL_FF": "2",
+          "LUT": "768",
+          "AVAIL_LUT": "14400",
+          "UTIL_LUT": "5",
           "URAM": "0",
           "AVAIL_URAM": "0",
           "UTIL_URAM": "0"
@@ -540,7 +632,7 @@
   "GenerateBdFiles": "0",
   "GenData": {
     "DataVersion": "0.2",
-    "Time": "2026-06-29 13:25:16 CEST",
+    "Time": "2026-07-28 14:28:03 CEST",
     "ToolName": "vitis_hls",
     "ToolVersion": "2022.2"
   }
