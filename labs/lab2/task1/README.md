@@ -1,119 +1,110 @@
-# Lab 2.1 — HLS IP Integration in a Block Design
+# Lab 2.1 — HLS calculator as an AXI4-Lite IP
 
-    ## Objective
+## Objective
 
-    Integrate an HLS-generated IP block into a Vivado block design and connect it to the surrounding system.
+Turn the Lab 1 display driver into an AXI4-Lite peripheral that also performs
+arithmetic, then integrate it into a Zynq block design and build a bitstream.
 
-    ## Background
+No Verilog or VHDL is written, and **no extra RTL source is added in Vivado**.
+The digit multiplexing stays inside the HLS block, which keeps the block design
+small enough to build in one session.
 
-    After students generate an IP block with HLS, they need to understand that the block does not automatically become a complete FPGA system. It must be imported, connected, clocked, reset, constrained, and validated in the context of a board-level design.
+## What changes compared to Lab 1
 
-    This task is part of the customized embedded processors lab rewrite. The goal is to create material that future students can follow from a clean start, without relying on undocumented instructor knowledge or fragile GUI state.
+If your Lab 1 works, this task is a small edit — that is the point.
 
-    ## What students should learn
+| Part of the design | Lab 2 |
+|---|---|
+| segment table (`SEG_A … SEG_G`) | unchanged |
+| active-low conversion | unchanged |
+| `tick` / `pos` scan registers | unchanged |
+| `*an = ~(1 << pos)` | unchanged |
+| `#pragma HLS PIPELINE II=1` | unchanged |
+| input ports | `value` becomes `op1`, `op2`, `op_sel` |
+| interface pragmas | three `s_axilite` lines instead of one `ap_none` |
+| new logic | one `switch` that computes the result |
 
-    - IP export and IP repository handling
-- Vivado block design workflow
-- clock and reset connectivity
-- board I/O and constraint awareness
-- address assignment if AXI interfaces are used
-- output product generation and bitstream build
-- debugging synthesis and implementation issues
+## The interface
 
-    ## Expected starting point
+```cpp
+void seven_segment_axi(ap_uint<7> op1, ap_uint<7> op2, ap_uint<2> op_sel,
+                       ap_uint<8> *seg, ap_uint<4> *an) {
+#pragma HLS INTERFACE s_axilite port=op1    bundle=CTRL
+#pragma HLS INTERFACE s_axilite port=op2    bundle=CTRL
+#pragma HLS INTERFACE s_axilite port=op_sel bundle=CTRL
+#pragma HLS INTERFACE ap_none   port=seg
+#pragma HLS INTERFACE ap_none   port=an
+#pragma HLS INTERFACE ap_ctrl_none port=return
+#pragma HLS PIPELINE II=1
+```
 
-    Students are expected to have:
+Only the three inputs become registers. `seg` and `an` stay plain wires that go
+to the board pins.
 
-    - access to the assigned lab machine or remote development node
-    - a cloned copy of this repository
-    - basic familiarity with Linux shell commands
-    - basic understanding of C/C++ functions
-    - basic awareness of FPGA design flow terminology
-    - no requirement to already know HLS in depth
+`ap_ctrl_none` keeps the block **free-running**, so the display never stops
+scanning and the processor does not have to start it. A useful consequence:
+the generated register map has **no `ap_start` register at all**.
 
-    ## Expected outcome
+## Arithmetic and edge cases
 
-    At the end of this task, students should be able to explain:
+Operands are 0 … 99. `op_sel` selects add (0), subtract (1), multiply (2),
+divide (3).
 
-    - what they built or verified
-    - which tool generated which artifact
-    - where the hardware/software boundary is
-    - how inputs and outputs are represented
-    - how the design was built, exported, integrated, or tested
-    - what common failure modes they encountered
-    - what they would check first when something fails
+Hardware cannot throw an exception, so every case must produce a defined
+display:
 
-    ## Student deliverables
+- negative results (subtraction) show a leading minus sign — segment G alone
+- division by zero shows `----`
+- anything that does not fit on four digits shows `----`
 
-    - block design screenshot or textual description
-- list of connected interfaces and signals
-- notes on clock/reset connections
-- Vivado validation result
-- synthesis/implementation status
-- bitstream generation note, if reached
-- known issues and debug notes
+`99 × 99 = 9801` still fits, so multiplication never overflows in this range.
 
-    ## Suggested workflow
+## The register map
 
-    1. locate the exported HLS IP
-2. add the IP repository path to Vivado
-3. refresh the IP catalog
-4. instantiate the generated IP in the block design
-5. connect clock, reset, and data/control interfaces
-6. validate the block design
-7. generate output products
-8. run synthesis and implementation
-9. generate bitstream if the design is complete
+Vitis HLS generates `xseven_segment_axi_hw.h` during export. Read the offsets
+from that file rather than guessing them:
 
-    ## Suggested repository layout
+| Offset | Register |
+|--------|----------|
+| `0x00` … `0x0c` | reserved (no `ap_start`) |
+| `0x10` | `op1` |
+| `0x18` | `op2` |
+| `0x20` | `op_sel` |
 
-    ```text
-    lab2/task1/
-    ├── README.md
-    ├── commands.md
-    ├── instructor_notes.md
-    ├── questions.md
-    └── expected_observations.md
-    ```
+## Workflow
 
-    ## Implementation notes
+1. Copy the Lab 1 sources to `seven_segment_axi.{h,cpp}`; rename the top
+   function and the include guard.
+2. Add the three `s_axilite` pragmas and the arithmetic `switch`.
+3. C simulation, then C synthesis — confirm **Interval = 1** again.
+4. **Export RTL** as a Vivado IP.
+5. In Vivado: new project, part `xc7z007sclg400-1`, add the Blackboard XDC,
+   **no design sources**.
+6. Block design: ZYNQ7 PS + Block Automation, add the IP repository, add the
+   IP, run Connection Automation.
+7. Make `seg` and `an` external — named exactly `seg` and `an`.
+8. Assign the address, validate, create the HDL wrapper.
+9. Synthesis → Implementation → Generate Bitstream.
+10. **Export Hardware** with the bitstream included, producing the XSA.
 
-    This documentation intentionally avoids providing final C/C++ implementation code. The lab should require students to reason about the design and produce the implementation themselves.
+## Common failure modes
 
-    A good solution should still be structured around:
+**A stale IP.** The exported IP keeps the same version number
+(`ces.kit.edu:hls:seven_segment_axi:1.0`) every time it is re-exported, so
+Vivado may quietly reuse a cached older copy. After changing the HLS code,
+refresh the IP catalog and check the block design really shows the new ports.
+Rebuilding the project from scratch is the reliable cure.
 
-    - one clearly identified design entry point
-    - simple and explainable input/output behavior
-    - minimal hidden state
-    - deterministic behavior for every relevant case
-    - build steps that can be reproduced from a clean checkout
-    - logs and reports that can be inspected after failure
+**External ports renamed.** If Vivado creates `seg_0` instead of `seg`, the XDC
+constraint no longer matches and the pins are never assigned. Rename it in
+External Port Properties.
 
-    ## Common risks
+**A stale XSA.** Whenever the hardware changes, the bitstream *and* the XSA must
+be regenerated. Lab 2.2 will otherwise build against an old description.
 
-    - adding the wrong generated directory as IP repository
-- not refreshing the IP catalog
-- leaving clock or reset unconnected
-- ignoring critical warnings
-- forgetting address assignment for AXI-connected IP
-- using stale output products
-- programming a bitstream generated from an older design
+## Expected result
 
-    ## Reflection questions
-
-    1. What is the input of this task?
-    2. What is the output?
-    3. Which part is generated automatically by the tool?
-    4. Which part is written or configured by the student?
-    5. What does the FPGA implement physically?
-    6. What would change if the design were extended?
-    7. Which build artifact is needed by the next stage?
-    8. What would you check first if the design does not work?
-
-    ## Current status
-
-    - task structure prepared
-    - student-facing explanation drafted
-    - build/run path documented separately
-    - troubleshooting collected in the shared guide
-    - implementation intentionally left for the lab development phase
+- An exported IP whose synthesis report shows `s_axi_CTRL`, `seg`, `an` and Interval = 1.
+- A validated block design with the display outputs pinned by the XDC.
+- A bitstream and an XSA generated from the current IP.
+- A short answer to: *where is the HLS IP connected inside the system?*

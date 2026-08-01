@@ -2,12 +2,12 @@
 <AdditionalInfo>
   <CTypeInfo>
       <RtlPort>
-        <name>seg_ones</name>
+        <name>an</name>
         <type>Unsigned</type>
         <fractionWidth>0</fractionWidth>
       </RtlPort>
       <RtlPort>
-        <name>seg_tens</name>
+        <name>seg</name>
         <type>Unsigned</type>
         <fractionWidth>0</fractionWidth>
       </RtlPort>
@@ -18,12 +18,12 @@
       </RtlPort>
   </CTypeInfo>
   <DesignConstraint>
-    <clk_period>10</clk_period>
+    <clk_period>20</clk_period>
   </DesignConstraint>
   <Machine>64</Machine>
   <modelParameters>
     <combinational>0</combinational>
-    <latency>1</latency>
-    <II>2 ~ 11</II>
+    <latency>34</latency>
+    <II>1</II>
   </modelParameters>
 </AdditionalInfo>

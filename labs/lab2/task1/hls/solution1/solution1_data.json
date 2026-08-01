@@ -5,7 +5,7 @@
   "RtlSubPrefix": "seven_segment_axi_",
   "SourceLanguage": "cpp",
   "HostMachineBits": "64",
-  "FunctionProtocol": "ap_ctrl_hs",
+  "FunctionProtocol": "ap_ctrl_none",
   "ResetStyle": "control",
   "Target": {
     "Family": "zynq",
@@ -54,28 +54,28 @@
           "direction": "in"
         }]
     },
-    "seg_tens": {
+    "seg": {
       "index": "3",
       "direction": "out",
       "srcType": "ap_uint<8>*",
       "srcSize": "8",
       "hwRefs": [{
           "type": "port",
-          "interface": "seg_tens",
-          "name": "seg_tens",
+          "interface": "seg",
+          "name": "seg",
           "usage": "data",
           "direction": "out"
         }]
     },
-    "seg_ones": {
+    "an": {
       "index": "4",
       "direction": "out",
-      "srcType": "ap_uint<8>*",
+      "srcType": "ap_uint<4>*",
       "srcSize": "8",
       "hwRefs": [{
           "type": "port",
-          "interface": "seg_ones",
-          "name": "seg_ones",
+          "interface": "an",
+          "name": "an",
           "usage": "data",
           "direction": "out"
         }]
@@ -100,38 +100,50 @@
   },
   "ClockInfo": {
     "ClockName": "ap_clk",
-    "ClockPeriod": "10",
-    "Uncertainty": "2.7",
+    "ClockPeriod": "20",
+    "Uncertainty": "5.4",
     "IsCombinational": "0",
-    "II": "3 ~ 38",
-    "Latency": "2"
+    "II": "1",
+    "Latency": "44"
   },
-  "Xdc": {"OocClocks": ["create_clock -name ap_clk -period 10.000 [get_ports ap_clk]"]},
+  "Xdc": {"OocClocks": ["create_clock -name ap_clk -period 20.000 [get_ports ap_clk]"]},
   "Ipx": {
     "Vendor": "ces.kit.edu",
     "Library": "hls",
     "Name": "seven_segment_axi",
     "Version": "1.0",
     "DisplayName": "seven_segment_axi",
-    "Revision": "2114716528",
+    "Revision": "2114721225",
     "Description": "AXI4-Lite controlled seven-segment display HLS IP",
     "Taxonomy": "\/UserIP",
     "AutoFamilySupport": "",
     "ZipFile": "ces_kit_edu_hls_seven_segment_axi_1_0.zip"
   },
   "Files": {
-    "CSource": ["..\/seven_segment_axi.cpp"],
+    "CSource": [
+      "..\/..\/lab2_task1_hls\/seven_segment_axi.cpp",
+      "..\/..\/lab2_task1_hls\/seven_segment_axi.h",
+      "..\/seven_segment_axi.cpp"
+    ],
     "Vhdl": [
       "impl\/vhdl\/seven_segment_axi_CTRL_s_axi.vhd",
+      "impl\/vhdl\/seven_segment_axi_mul_7ns_7ns_14_1_1.vhd",
       "impl\/vhdl\/seven_segment_axi_mul_7ns_34ns_40_2_1.vhd",
       "impl\/vhdl\/seven_segment_axi_mux_164_7_1_1.vhd",
+      "impl\/vhdl\/seven_segment_axi_udiv_7ns_7ns_7_11_1.vhd",
+      "impl\/vhdl\/seven_segment_axi_udiv_14ns_10ns_14_18_1.vhd",
+      "impl\/vhdl\/seven_segment_axi_urem_14ns_5ns_4_18_1.vhd",
       "impl\/vhdl\/seven_segment_axi_urem_32s_5ns_4_36_seq_1.vhd",
       "impl\/vhdl\/seven_segment_axi.vhd"
     ],
     "Verilog": [
       "impl\/verilog\/seven_segment_axi_CTRL_s_axi.v",
+      "impl\/verilog\/seven_segment_axi_mul_7ns_7ns_14_1_1.v",
       "impl\/verilog\/seven_segment_axi_mul_7ns_34ns_40_2_1.v",
       "impl\/verilog\/seven_segment_axi_mux_164_7_1_1.v",
+      "impl\/verilog\/seven_segment_axi_udiv_7ns_7ns_7_11_1.v",
+      "impl\/verilog\/seven_segment_axi_udiv_14ns_10ns_14_18_1.v",
+      "impl\/verilog\/seven_segment_axi_urem_14ns_5ns_4_18_1.v",
       "impl\/verilog\/seven_segment_axi_urem_32s_5ns_4_36_seq_1.v",
       "impl\/verilog\/seven_segment_axi.v"
     ],
@@ -187,161 +199,6 @@
         "s_axi_CTRL_WVALID"
       ],
       "registers": [
-        {
-          "offset": "0x00",
-          "name": "CTRL",
-          "access": "RW",
-          "description": "Control signals",
-          "range": "32",
-          "fields": [
-            {
-              "offset": "0",
-              "width": "1",
-              "name": "AP_START",
-              "access": "RW",
-              "description": "Control signal Register for 'ap_start'."
-            },
-            {
-              "offset": "1",
-              "width": "1",
-              "name": "AP_DONE",
-              "access": "R",
-              "description": "Control signal Register for 'ap_done'."
-            },
-            {
-              "offset": "2",
-              "width": "1",
-              "name": "AP_IDLE",
-              "access": "R",
-              "description": "Control signal Register for 'ap_idle'."
-            },
-            {
-              "offset": "3",
-              "width": "1",
-              "name": "AP_READY",
-              "access": "R",
-              "description": "Control signal Register for 'ap_ready'."
-            },
-            {
-              "offset": "4",
-              "width": "3",
-              "name": "RESERVED_1",
-              "access": "R",
-              "description": "Reserved.  0s on read."
-            },
-            {
-              "offset": "7",
-              "width": "1",
-              "name": "AUTO_RESTART",
-              "access": "RW",
-              "description": "Control signal Register for 'auto_restart'."
-            },
-            {
-              "offset": "8",
-              "width": "1",
-              "name": "RESERVED_2",
-              "access": "R",
-              "description": "Reserved.  0s on read."
-            },
-            {
-              "offset": "9",
-              "width": "1",
-              "name": "INTERRUPT",
-              "access": "R",
-              "description": "Control signal Register for 'interrupt'."
-            },
-            {
-              "offset": "10",
-              "width": "22",
-              "name": "RESERVED_3",
-              "access": "R",
-              "description": "Reserved.  0s on read."
-            }
-          ]
-        },
-        {
-          "offset": "0x04",
-          "name": "GIER",
-          "access": "RW",
-          "description": "Global Interrupt Enable Register",
-          "range": "32",
-          "fields": [
-            {
-              "offset": "0",
-              "width": "1",
-              "name": "Enable",
-              "access": "RW",
-              "description": "Master enable for the device interrupt output to the system interrupt controller: 0 = Disabled, 1 = Enabled"
-            },
-            {
-              "offset": "1",
-              "width": "31",
-              "name": "RESERVED",
-              "access": "R",
-              "description": "Reserved.  0s on read."
-            }
-          ]
-        },
-        {
-          "offset": "0x08",
-          "name": "IP_IER",
-          "access": "RW",
-          "description": "IP Interrupt Enable Register",
-          "range": "32",
-          "fields": [
-            {
-              "offset": "0",
-              "width": "1",
-              "name": "CHAN0_INT_EN",
-              "access": "RW",
-              "description": "Enable Channel 0 (ap_done) Interrupt.  0 = Disabled, 1 = Enabled."
-            },
-            {
-              "offset": "1",
-              "width": "1",
-              "name": "CHAN1_INT_EN",
-              "access": "RW",
-              "description": "Enable Channel 1 (ap_ready) Interrupt.  0 = Disabled, 1 = Enabled."
-            },
-            {
-              "offset": "2",
-              "width": "30",
-              "name": "RESERVED_0",
-              "access": "R",
-              "description": "Reserved.  0s on read."
-            }
-          ]
-        },
-        {
-          "offset": "0x0c",
-          "name": "IP_ISR",
-          "access": "RW",
-          "description": "IP Interrupt Status Register",
-          "range": "32",
-          "fields": [
-            {
-              "offset": "0",
-              "width": "1",
-              "name": "CHAN0_INT_ST",
-              "access": "RTOW",
-              "description": "Channel 0 (ap_done) Interrupt Status. 0 = No Channel 0 interrupt, 1 = Channel 0 interrupt."
-            },
-            {
-              "offset": "1",
-              "width": "1",
-              "name": "CHAN1_INT_ST",
-              "access": "RTOW",
-              "description": "Channel 1 (ap_ready) Interrupt Status. 0 = No Channel 1 interrupt, 1 = Channel 1 interrupt."
-            },
-            {
-              "offset": "2",
-              "width": "30",
-              "name": "RESERVED_0",
-              "access": "R",
-              "description": "Reserved.  0s on read."
-            }
-          ]
-        },
         {
           "offset": "0x10",
           "name": "op1",
@@ -455,43 +312,34 @@
       "portMap": {"ap_rst_n": "RST"},
       "ports": ["ap_rst_n"]
     },
-    "interrupt": {
-      "type": "interrupt",
-      "busTypeName": "interrupt",
-      "mode": "master",
-      "dataWidth": "1",
-      "busParams": {"SENSITIVITY": "LEVEL_HIGH"},
-      "portMap": {"interrupt": "INTERRUPT"},
-      "ports": ["interrupt"]
-    },
-    "seg_tens": {
+    "seg": {
       "type": "data",
       "busTypeName": "data",
       "protocol": "ap_none",
       "mode": "master",
       "dataWidth": "8",
-      "portMap": {"seg_tens": "DATA"},
-      "ports": ["seg_tens"],
+      "portMap": {"seg": "DATA"},
+      "ports": ["seg"],
       "constraints": [{
           "constraint_type": "pragma interface",
           "mode": "ap_none",
           "register_option": "0",
-          "argName": "seg_tens"
+          "argName": "seg"
         }]
     },
-    "seg_ones": {
+    "an": {
       "type": "data",
       "busTypeName": "data",
       "protocol": "ap_none",
       "mode": "master",
-      "dataWidth": "8",
-      "portMap": {"seg_ones": "DATA"},
-      "ports": ["seg_ones"],
+      "dataWidth": "4",
+      "portMap": {"an": "DATA"},
+      "ports": ["an"],
       "constraints": [{
           "constraint_type": "pragma interface",
           "mode": "ap_none",
           "register_option": "0",
-          "argName": "seg_ones"
+          "argName": "an"
         }]
     }
   },
@@ -572,57 +420,51 @@
       "dir": "in",
       "width": "1"
     },
-    "interrupt": {
-      "dir": "out",
-      "width": "1"
-    },
-    "seg_tens": {
+    "seg": {
       "dir": "out",
       "width": "8"
     },
-    "seg_ones": {
+    "an": {
       "dir": "out",
-      "width": "8"
+      "width": "4"
     }
   },
   "ModuleInfo": {
     "Hierarchy": {"ModuleName": "seven_segment_axi"},
     "Info": {"seven_segment_axi": {
-        "FunctionProtocol": "ap_ctrl_hs",
+        "FunctionProtocol": "ap_ctrl_none",
         "isTaskLevelControl": "0",
-        "isPipelined": "0",
+        "isPipelined": "1",
         "isCombinational": "0",
         "isOneStateSeq": "0"
       }},
     "Metrics": {"seven_segment_axi": {
         "Latency": {
-          "LatencyBest": "2",
-          "LatencyAvg": "20",
-          "LatencyWorst": "37",
-          "PipelineIIMin": "3",
-          "PipelineIIMax": "38",
-          "PipelineII": "3 ~ 38",
-          "PipelineDepth": "",
-          "PipelineType": "no"
+          "LatencyBest": "44",
+          "LatencyAvg": "44",
+          "LatencyWorst": "44",
+          "PipelineII": "1",
+          "PipelineDepth": "45",
+          "PipelineType": "yes"
         },
         "Timing": {
-          "Target": "10.00",
-          "Uncertainty": "2.70",
-          "Estimate": "6.912"
+          "Target": "20.00",
+          "Uncertainty": "5.40",
+          "Estimate": "12.286"
         },
         "Area": {
           "BRAM_18K": "0",
           "AVAIL_BRAM": "100",
           "UTIL_BRAM": "0",
-          "DSP": "1",
+          "DSP": "0",
           "AVAIL_DSP": "66",
-          "UTIL_DSP": "1",
-          "FF": "715",
+          "UTIL_DSP": "0",
+          "FF": "2469",
           "AVAIL_FF": "28800",
-          "UTIL_FF": "2",
-          "LUT": "768",
+          "UTIL_FF": "8",
+          "LUT": "1732",
           "AVAIL_LUT": "14400",
-          "UTIL_LUT": "5",
+          "UTIL_LUT": "12",
           "URAM": "0",
           "AVAIL_URAM": "0",
           "UTIL_URAM": "0"
@@ -632,7 +474,7 @@
   "GenerateBdFiles": "0",
   "GenData": {
     "DataVersion": "0.2",
-    "Time": "2026-07-28 14:28:03 CEST",
+    "Time": "2026-07-31 20:45:17 CEST",
     "ToolName": "vitis_hls",
     "ToolVersion": "2022.2"
   }

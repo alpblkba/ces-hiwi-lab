@@ -81,23 +81,13 @@ int XSeven_segment_axi_Initialize(XSeven_segment_axi *InstancePtr, const char* I
 int XSeven_segment_axi_Release(XSeven_segment_axi *InstancePtr);
 #endif
 
-void XSeven_segment_axi_Start(XSeven_segment_axi *InstancePtr);
-u32 XSeven_segment_axi_IsDone(XSeven_segment_axi *InstancePtr);
-u32 XSeven_segment_axi_IsIdle(XSeven_segment_axi *InstancePtr);
-u32 XSeven_segment_axi_IsReady(XSeven_segment_axi *InstancePtr);
-void XSeven_segment_axi_EnableAutoRestart(XSeven_segment_axi *InstancePtr);
-void XSeven_segment_axi_DisableAutoRestart(XSeven_segment_axi *InstancePtr);
 
-void XSeven_segment_axi_Set_digit(XSeven_segment_axi *InstancePtr, u32 Data);
-u32 XSeven_segment_axi_Get_digit(XSeven_segment_axi *InstancePtr);
-
-void XSeven_segment_axi_InterruptGlobalEnable(XSeven_segment_axi *InstancePtr);
-void XSeven_segment_axi_InterruptGlobalDisable(XSeven_segment_axi *InstancePtr);
-void XSeven_segment_axi_InterruptEnable(XSeven_segment_axi *InstancePtr, u32 Mask);
-void XSeven_segment_axi_InterruptDisable(XSeven_segment_axi *InstancePtr, u32 Mask);
-void XSeven_segment_axi_InterruptClear(XSeven_segment_axi *InstancePtr, u32 Mask);
-u32 XSeven_segment_axi_InterruptGetEnabled(XSeven_segment_axi *InstancePtr);
-u32 XSeven_segment_axi_InterruptGetStatus(XSeven_segment_axi *InstancePtr);
+void XSeven_segment_axi_Set_op1(XSeven_segment_axi *InstancePtr, u32 Data);
+u32 XSeven_segment_axi_Get_op1(XSeven_segment_axi *InstancePtr);
+void XSeven_segment_axi_Set_op2(XSeven_segment_axi *InstancePtr, u32 Data);
+u32 XSeven_segment_axi_Get_op2(XSeven_segment_axi *InstancePtr);
+void XSeven_segment_axi_Set_op_sel(XSeven_segment_axi *InstancePtr, u32 Data);
+u32 XSeven_segment_axi_Get_op_sel(XSeven_segment_axi *InstancePtr);
 
 #ifdef __cplusplus
 }

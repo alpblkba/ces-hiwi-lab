@@ -9,36 +9,39 @@
 <ProductFamily>zynq</ProductFamily>
 <Part>xc7z007s-clg400-1</Part>
 <TopModelName>seven_segment_axi</TopModelName>
-<TargetClockPeriod>10.00</TargetClockPeriod>
-<ClockUncertainty>2.70</ClockUncertainty>
+<TargetClockPeriod>20.00</TargetClockPeriod>
+<ClockUncertainty>5.40</ClockUncertainty>
+<TargetInitiationInterval>1</TargetInitiationInterval>
 <FlowTarget>vivado</FlowTarget>
 </UserAssignments>
 
 <PerformanceEstimates>
-<PipelineType>no</PipelineType>
+<PipelineType>yes</PipelineType>
 <SummaryOfTimingAnalysis>
 <unit>ns</unit>
-<EstimatedClockPeriod>6.912</EstimatedClockPeriod>
+<EstimatedClockPeriod>12.286</EstimatedClockPeriod>
 </SummaryOfTimingAnalysis>
 <SummaryOfOverallLatency>
 <unit>clock cycles</unit>
-<Best-caseLatency>2</Best-caseLatency>
-<Average-caseLatency>20</Average-caseLatency>
-<Worst-caseLatency>37</Worst-caseLatency>
-<Best-caseRealTimeLatency>20.000 ns</Best-caseRealTimeLatency>
-<Average-caseRealTimeLatency>0.200 us</Average-caseRealTimeLatency>
-<Worst-caseRealTimeLatency>0.370 us</Worst-caseRealTimeLatency>
-<Interval-min>3</Interval-min>
-<Interval-max>38</Interval-max>
+<Best-caseLatency>44</Best-caseLatency>
+<Average-caseLatency>44</Average-caseLatency>
+<Worst-caseLatency>44</Worst-caseLatency>
+<Best-caseRealTimeLatency>0.880 us</Best-caseRealTimeLatency>
+<Average-caseRealTimeLatency>0.880 us</Average-caseRealTimeLatency>
+<Worst-caseRealTimeLatency>0.880 us</Worst-caseRealTimeLatency>
+<PipelineInitiationInterval>1</PipelineInitiationInterval>
+<PipelineDepth>45</PipelineDepth>
+<Interval-min>1</Interval-min>
+<Interval-max>1</Interval-max>
 </SummaryOfOverallLatency>
 </PerformanceEstimates>
 
 <AreaEstimates>
 <Resources>
 <BRAM_18K>0</BRAM_18K>
-<DSP>1</DSP>
-<FF>715</FF>
-<LUT>768</LUT>
+<DSP>0</DSP>
+<FF>2469</FF>
+<LUT>1732</LUT>
 <URAM>0</URAM>
 </Resources>
 <AvailableResources>
@@ -60,7 +63,7 @@
 <Bits>1</Bits>
 <Attribute>unknown</Attribute>
 <CType>int</CType>
-<HasCtrl>1</HasCtrl>
+<HasCtrl>0</HasCtrl>
 </RtlPorts>
 <RtlPorts>
 <name>s_axi_CTRL_AWREADY</name>
@@ -71,7 +74,7 @@
 <Bits>1</Bits>
 <Attribute>unknown</Attribute>
 <CType>int</CType>
-<HasCtrl>1</HasCtrl>
+<HasCtrl>0</HasCtrl>
 </RtlPorts>
 <RtlPorts>
 <name>s_axi_CTRL_AWADDR</name>
@@ -82,7 +85,7 @@
 <Bits>6</Bits>
 <Attribute>unknown</Attribute>
 <CType>int</CType>
-<HasCtrl>1</HasCtrl>
+<HasCtrl>0</HasCtrl>
 </RtlPorts>
 <RtlPorts>
 <name>s_axi_CTRL_WVALID</name>
@@ -93,7 +96,7 @@
 <Bits>1</Bits>
 <Attribute>unknown</Attribute>
 <CType>int</CType>
-<HasCtrl>1</HasCtrl>
+<HasCtrl>0</HasCtrl>
 </RtlPorts>
 <RtlPorts>
 <name>s_axi_CTRL_WREADY</name>
@@ -104,7 +107,7 @@
 <Bits>1</Bits>
 <Attribute>unknown</Attribute>
 <CType>int</CType>
-<HasCtrl>1</HasCtrl>
+<HasCtrl>0</HasCtrl>
 </RtlPorts>
 <RtlPorts>
 <name>s_axi_CTRL_WDATA</name>
@@ -115,7 +118,7 @@
 <Bits>32</Bits>
 <Attribute>unknown</Attribute>
 <CType>int</CType>
-<HasCtrl>1</HasCtrl>
+<HasCtrl>0</HasCtrl>
 </RtlPorts>
 <RtlPorts>
 <name>s_axi_CTRL_WSTRB</name>
@@ -126,7 +129,7 @@
 <Bits>4</Bits>
 <Attribute>unknown</Attribute>
 <CType>int</CType>
-<HasCtrl>1</HasCtrl>
+<HasCtrl>0</HasCtrl>
 </RtlPorts>
 <RtlPorts>
 <name>s_axi_CTRL_ARVALID</name>
@@ -137,7 +140,7 @@
 <Bits>1</Bits>
 <Attribute>unknown</Attribute>
 <CType>int</CType>
-<HasCtrl>1</HasCtrl>
+<HasCtrl>0</HasCtrl>
 </RtlPorts>
 <RtlPorts>
 <name>s_axi_CTRL_ARREADY</name>
@@ -148,7 +151,7 @@
 <Bits>1</Bits>
 <Attribute>unknown</Attribute>
 <CType>int</CType>
-<HasCtrl>1</HasCtrl>
+<HasCtrl>0</HasCtrl>
 </RtlPorts>
 <RtlPorts>
 <name>s_axi_CTRL_ARADDR</name>
@@ -159,7 +162,7 @@
 <Bits>6</Bits>
 <Attribute>unknown</Attribute>
 <CType>int</CType>
-<HasCtrl>1</HasCtrl>
+<HasCtrl>0</HasCtrl>
 </RtlPorts>
 <RtlPorts>
 <name>s_axi_CTRL_RVALID</name>
@@ -170,7 +173,7 @@
 <Bits>1</Bits>
 <Attribute>unknown</Attribute>
 <CType>int</CType>
-<HasCtrl>1</HasCtrl>
+<HasCtrl>0</HasCtrl>
 </RtlPorts>
 <RtlPorts>
 <name>s_axi_CTRL_RREADY</name>
@@ -181,7 +184,7 @@
 <Bits>1</Bits>
 <Attribute>unknown</Attribute>
 <CType>int</CType>
-<HasCtrl>1</HasCtrl>
+<HasCtrl>0</HasCtrl>
 </RtlPorts>
 <RtlPorts>
 <name>s_axi_CTRL_RDATA</name>
@@ -192,7 +195,7 @@
 <Bits>32</Bits>
 <Attribute>unknown</Attribute>
 <CType>int</CType>
-<HasCtrl>1</HasCtrl>
+<HasCtrl>0</HasCtrl>
 </RtlPorts>
 <RtlPorts>
 <name>s_axi_CTRL_RRESP</name>
@@ -203,7 +206,7 @@
 <Bits>2</Bits>
 <Attribute>unknown</Attribute>
 <CType>int</CType>
-<HasCtrl>1</HasCtrl>
+<HasCtrl>0</HasCtrl>
 </RtlPorts>
 <RtlPorts>
 <name>s_axi_CTRL_BVALID</name>
@@ -214,7 +217,7 @@
 <Bits>1</Bits>
 <Attribute>unknown</Attribute>
 <CType>int</CType>
-<HasCtrl>1</HasCtrl>
+<HasCtrl>0</HasCtrl>
 </RtlPorts>
 <RtlPorts>
 <name>s_axi_CTRL_BREADY</name>
@@ -225,7 +228,7 @@
 <Bits>1</Bits>
 <Attribute>unknown</Attribute>
 <CType>int</CType>
-<HasCtrl>1</HasCtrl>
+<HasCtrl>0</HasCtrl>
 </RtlPorts>
 <RtlPorts>
 <name>s_axi_CTRL_BRESP</name>
@@ -236,14 +239,14 @@
 <Bits>2</Bits>
 <Attribute>unknown</Attribute>
 <CType>int</CType>
-<HasCtrl>1</HasCtrl>
+<HasCtrl>0</HasCtrl>
 </RtlPorts>
 <RtlPorts>
 <name>ap_clk</name>
 <Object>seven_segment_axi</Object>
 <Type>return value</Type>
 <Scope></Scope>
-<IOProtocol>ap_ctrl_hs</IOProtocol>
+<IOProtocol>ap_ctrl_none</IOProtocol>
 <IOConfig></IOConfig>
 <Dir>in</Dir>
 <Bits>1</Bits>
@@ -254,26 +257,15 @@
 <Object>seven_segment_axi</Object>
 <Type>return value</Type>
 <Scope></Scope>
-<IOProtocol>ap_ctrl_hs</IOProtocol>
+<IOProtocol>ap_ctrl_none</IOProtocol>
 <IOConfig></IOConfig>
 <Dir>in</Dir>
 <Bits>1</Bits>
 <Attribute>control</Attribute>
 </RtlPorts>
 <RtlPorts>
-<name>interrupt</name>
-<Object>seven_segment_axi</Object>
-<Type>return value</Type>
-<Scope></Scope>
-<IOProtocol>ap_ctrl_hs</IOProtocol>
-<IOConfig></IOConfig>
-<Dir>out</Dir>
-<Bits>1</Bits>
-<Attribute>unknown</Attribute>
-</RtlPorts>
-<RtlPorts>
-<name>seg_tens</name>
-<Object>seg_tens</Object>
+<name>seg</name>
+<Object>seg</Object>
 <Type>pointer</Type>
 <Scope></Scope>
 <IOProtocol>ap_none</IOProtocol>
@@ -284,14 +276,14 @@
 <CType>int</CType>
 </RtlPorts>
 <RtlPorts>
-<name>seg_ones</name>
-<Object>seg_ones</Object>
+<name>an</name>
+<Object>an</Object>
 <Type>pointer</Type>
 <Scope></Scope>
 <IOProtocol>ap_none</IOProtocol>
 <IOConfig></IOConfig>
 <Dir>out</Dir>
-<Bits>8</Bits>
+<Bits>4</Bits>
 <Attribute>data</Attribute>
 <CType>int</CType>
 </RtlPorts>

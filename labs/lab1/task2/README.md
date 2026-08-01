@@ -1,111 +1,113 @@
-# Lab 1.2: One-digit seven-segment display with HLS
+# Lab 1.2: Seven-segment display with HLS
 
 ## Objective
 
-In this task, you will implement a simple seven-segment display decoder using C/C++ and Vitis HLS.
+Drive the Blackboard's four-digit seven-segment display from a C++ function
+synthesized with Vitis HLS. No Verilog or VHDL is written.
 
-The design receives a single digit as input and produces the corresponding seven-segment output pattern. The mandatory part of the task is a one-digit display decoder. 
-No handwritten HDL code is required for the decoder logic. The hardware block is generated from the HLS C/C++ implementation.
+The display shows a number you pass in. Two digits are the standard case; the
+same design handles three and four digits without extra work.
 
-## Scope
+## The hardware you are driving
 
-In this task, you will:
+The board has four digits, and they **share one 8-bit segment bus**:
 
-1. write a C/C++ function for a one-digit seven-segment decoder,
-2. synthesize the function with Vitis HLS,
-3. verify the mapping using Vitis HLS simulation
+```text
+seg[0] = SSEG_CA (A)     seg[4] = SSEG_CE (E)
+seg[1] = SSEG_CB (B)     seg[5] = SSEG_CF (F)
+seg[2] = SSEG_CC (C)     seg[6] = SSEG_CG (G)
+seg[3] = SSEG_CD (D)     seg[7] = SSEG_DP (decimal point)
 
-## Background
+an[0] = rightmost digit  …  an[3] = leftmost digit
+```
 
-High-Level Synthesis, or HLS, is a design flow where hardware is described using a higher-level programming language such as C or C++ instead of writing register-transfer level logic directly in Verilog or VHDL. The HLS tool analyzes the C/C++ function and generates hardware logic from it. This does not mean that the code runs as software on a processor. After synthesis, the function becomes a hardware block with input and output ports.
+Segments and anodes are **active-low**: a `0` turns a segment or a digit on.
 
-In this lab, HLS is used because it allows a small hardware function to be described in a familiar programming style while still producing synthesizable hardware. This is useful for learning the hardware design flow step by step. Students can first check the behavior of the function with a normal C/C++ testbench, then use Vitis HLS to generate RTL and synthesis reports. A seven-segment decoder is a suitable first HLS example because the function is small, deterministic, and easy to verify. The input is a digit, and the output is a fixed pattern of segment control bits. This makes it possible to focus on the HLS workflow without introducing unnecessary algorithmic complexity.
+Because the cathodes are shared, **only one digit can display a pattern at any
+instant**. If two anodes are enabled together, both digits show the same thing.
 
-The important point is that the C/C++ function describes hardware behavior, not a general-purpose software program. Features such as dynamic memory allocation, file I/O, operating-system calls, or unbounded loops are not appropriate for this kind of simple hardware block. The function should have clear inputs, clear outputs, and a predictable mapping from input values to output bits.
+## The consequence: the design needs a clock
 
-In this task, we are going to implement a one-digit seven-segment decoder, optionally you can implement a two-digit version additionally. The design can be implemented as a lookup table or as a switch-case statement. Both approaches describe the same hardware idea: each valid digit selects one predefined segment pattern. For invalid input values, the design should still produce a defined output, such as turning all segments off. The segment pattern depends on the board convention. Some displays are active-high, where a segment turns on when its control bit is 1. Others are active-low, where a segment turns on when its control bit is 0. The implementation should therefore be written so that the selected convention is clear and easy to change if the board requires the opposite polarity.
-The purpose of this task is not only to create a working decoder, but also to understand the basic HLS flow: write the C/C++ function, test it in C simulation, synthesize it, inspect the report, and prepare the generated hardware block for later integration in Vivado. This same workflow will be used again for larger hardware functions later in the lab.
+To show different digits you light them **one at a time, in turn, quickly**. At
+roughly 1 ms per digit the eye merges them into one steady number.
 
-A seven-segment display consists of seven individually controlled segments. By enabling different combinations of these segments, decimal digits can be displayed.
+That means the block has to remember where it is in the scan. A purely
+combinational function cannot: its output depends only on its inputs *right now*,
+so it has no notion of "later".
 
-In this task, the HLS function maps an input digit to a segment pattern. For example, the input value 0 should enable the segments required to display the digit 0. The same idea applies to the digits 1 through 9.
+In HLS, `static` local variables become registers, and `ap_ctrl_none` makes the
+block free-running so its body executes once per clock cycle:
 
-The exact electrical convention of the board determines whether a segment is active-high or active-low. This means that a segment may turn on when its output bit is 1, or it may turn on when its output bit is 0. The lab setup or board documentation will specify which convention is used.
+```cpp
+static ap_uint<16> tick = 0;   // cycles elapsed inside the current digit slot
+static ap_uint<2>  pos  = 0;   // which digit is lit right now
+```
+
+`pos` is two bits wide, so `3 + 1` wraps to `0` by itself.
 
 ## Design description
 
-The mandatory design is a one-digit decoder.
-
 Input:
 
-- one digit value
-- valid range: 0 to 9
+- one value, 0 … 9999 (only 0 … 99 is needed for the mandatory two-digit case)
 
-Output:
+Outputs:
 
-- seven segment control bits
-- one bit per segment
+- `seg[7:0]` — the segment pattern for the digit currently lit
+- `an[3:0]` — which digit is currently lit, active-low, exactly one bit at `0`
 
-The function should produce a valid segment pattern for each decimal digit from 0 to 9.
+Behaviour:
 
-For input values outside the decimal range, the design should produce a defined output. A common choice is to turn all segments off.
+- leading zeros are blanked, so `42` shows as `··42` rather than `0042`
+- the segment table is derived from the pin mapping above, not guessed
+- every input produces a defined output
 
-## Recommended implementation approach
+## Two things that are easy to get wrong
 
-Start with a small C/C++ HLS function that maps one input digit to one seven-segment output pattern.
+**Segment bit order.** If segment A is placed in the wrong bit, every pattern is
+mirrored: `2` appears as `5`, `6` as `9`. Symmetric digits such as `0` and `8`
+still look correct, which hides the mistake. Write the table from named bits
+(`SEG_A … SEG_G`) so the wiring appears in exactly one place.
 
-The implementation should be simple and deterministic:
+**Initiation interval.** Add `#pragma HLS PIPELINE II=1`. Without it Vitis HLS
+spreads the function body over roughly 35 clock cycles, the scan runs about 35×
+too slowly, and the display flickers visibly. **C simulation cannot detect this** —
+only the Interval column of the synthesis report shows it.
 
-- no dynamic memory allocation,
-- no file I/O,
-- no operating-system calls,
-- no unbounded loops,
-- no unnecessary global state.
+## Testbench
 
-A lookup table is usually the simplest implementation for this task. A switch-case implementation is also acceptable. In both cases, each valid decimal digit should select one predefined segment pattern.
+The testbench is plain C++ and is never synthesized. It uses **fixed values**, so
+any failure is reproducible:
 
-For invalid input values, the function should still produce a defined output. A common choice is to turn all segments off.
+```cpp
+unsigned int values[] = {0, 7, 42, 99, 100, 9999};
+```
 
-## HLS workflow
+To observe a complete scan it calls the function often enough to cover all four
+digit slots and records which pattern each anode received. It also checks that
+**exactly one anode is active in every cycle**.
 
-The recommended workflow is:
+There is no keyboard input here. Interactive input arrives in Lab 2.2, from a C
+program running on the ARM processor.
 
-1. create the C/C++ HLS source file,
-2. select the decoder function as the HLS top function,
-3. configure the target part or board as instructed,
-4. run C synthesis,
-5. inspect the synthesis report,
-6. export the generated RTL or IP block.
+## Workflow
 
-If instructed, the digit-to-segment mapping can also be checked with Vitis HLS simulation before synthesis. This is useful for catching simple mapping mistakes early, but the main goal of this task is to generate a synthesizable HLS block for later Vivado integration.
-
-## Optional extension: two-digit display
-
-After the one-digit version works, the design can be extended to support two decimal digits.
-
-A possible two-digit extension receives a value from 0 to 99 and produces two seven-segment patterns:
-
-- one pattern for the tens digit,
-- one pattern for the ones digit.
-
-The two-digit extension is optional. Complete and synthesize the one-digit decoder first.
+1. Write `seven_segment.h`, `seven_segment.cpp`, `seven_segment_tb.cpp`.
+2. Create the Vitis HLS project; part `xc7z007sclg400-1`, clock 20 ns.
+3. Run C simulation until the fixed vectors pass.
+4. Run C synthesis and confirm **Interval = 1** and that timing is met.
+5. Export the design as a Vivado IP.
 
 ## Expected result
 
-At the end of this task, you should have:
+- Three source files and a passing C simulation.
+- A synthesis report showing Interval = 1, no BRAM and no DSP.
+- An exported IP under `solution1/impl/ip/`.
+- A short answer to: *why does this display need a clock at all?*
 
-- a C/C++ HLS implementation of a one-digit seven-segment decoder,
-- a selected HLS top function,
-- a successful Vitis HLS synthesis run,
-- generated reports for the synthesized design,
-- an exported HLS IP or RTL output for later Vivado integration.
+## Optional extensions
 
-If simulation is used, the digit-to-segment mapping should match the expected display behavior before synthesis.
-
-## Notes
-
-Keep the HLS function small and easy to inspect. The purpose of this task is to understand the basic HLS flow, not to build a complex display driver.
-
-Do not write the decoder directly in Verilog. The decoder logic should come from the C/C++ HLS implementation.
-
-Do not continue to the Vivado integration step until the HLS synthesis result is available and the generated reports can be inspected.
+- Show three or four digits: the scan already covers all four positions, so only
+  the blanking rule changes.
+- Use the decimal point (`seg[7]`).
+- Make the refresh rate a parameter and find the point where flicker becomes visible.

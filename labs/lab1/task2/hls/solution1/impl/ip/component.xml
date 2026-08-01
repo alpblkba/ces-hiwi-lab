@@ -66,7 +66,7 @@
       </spirit:portMaps>
     </spirit:busInterface>
     <spirit:busInterface>
-      <spirit:name>seg_tens</spirit:name>
+      <spirit:name>seg</spirit:name>
       <spirit:busType spirit:vendor="xilinx.com" spirit:library="signal" spirit:name="data" spirit:version="1.0"/>
       <spirit:abstractionType spirit:vendor="xilinx.com" spirit:library="signal" spirit:name="data_rtl" spirit:version="1.0"/>
       <spirit:master/>
@@ -76,13 +76,13 @@
             <spirit:name>DATA</spirit:name>
           </spirit:logicalPort>
           <spirit:physicalPort>
-            <spirit:name>seg_tens</spirit:name>
+            <spirit:name>seg</spirit:name>
           </spirit:physicalPort>
         </spirit:portMap>
       </spirit:portMaps>
     </spirit:busInterface>
     <spirit:busInterface>
-      <spirit:name>seg_ones</spirit:name>
+      <spirit:name>an</spirit:name>
       <spirit:busType spirit:vendor="xilinx.com" spirit:library="signal" spirit:name="data" spirit:version="1.0"/>
       <spirit:abstractionType spirit:vendor="xilinx.com" spirit:library="signal" spirit:name="data_rtl" spirit:version="1.0"/>
       <spirit:master/>
@@ -92,7 +92,7 @@
             <spirit:name>DATA</spirit:name>
           </spirit:logicalPort>
           <spirit:physicalPort>
-            <spirit:name>seg_ones</spirit:name>
+            <spirit:name>an</spirit:name>
           </spirit:physicalPort>
         </spirit:portMap>
       </spirit:portMaps>
@@ -112,7 +112,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>1aa45251</spirit:value>
+            <spirit:value>f71f3239</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -128,7 +128,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>ff82a342</spirit:value>
+            <spirit:value>e6368bec</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -144,7 +144,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>07674d0c</spirit:value>
+            <spirit:value>625acd4d</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -160,7 +160,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>071236ef</spirit:value>
+            <spirit:value>84b01940</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -247,7 +247,7 @@
         <spirit:wire>
           <spirit:direction>in</spirit:direction>
           <spirit:vector>
-            <spirit:left spirit:format="long">6</spirit:left>
+            <spirit:left spirit:format="long">13</spirit:left>
             <spirit:right spirit:format="long">0</spirit:right>
           </spirit:vector>
           <spirit:wireTypeDefs>
@@ -260,7 +260,7 @@
         </spirit:wire>
       </spirit:port>
       <spirit:port>
-        <spirit:name>seg_tens</spirit:name>
+        <spirit:name>seg</spirit:name>
         <spirit:wire>
           <spirit:direction>out</spirit:direction>
           <spirit:vector>
@@ -277,11 +277,11 @@
         </spirit:wire>
       </spirit:port>
       <spirit:port>
-        <spirit:name>seg_ones</spirit:name>
+        <spirit:name>an</spirit:name>
         <spirit:wire>
           <spirit:direction>out</spirit:direction>
           <spirit:vector>
-            <spirit:left spirit:format="long">7</spirit:left>
+            <spirit:left spirit:format="long">3</spirit:left>
             <spirit:right spirit:format="long">0</spirit:right>
           </spirit:vector>
           <spirit:wireTypeDefs>
@@ -304,15 +304,11 @@
         <spirit:userFileType>USED_IN_out_of_context</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/verilog/seven_segment_mul_7ns_9ns_15_1_1.v</spirit:name>
+        <spirit:name>hdl/verilog/seven_segment_udiv_14ns_10ns_14_18_1.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/verilog/seven_segment_mux_164_7_1_1.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>hdl/verilog/seven_segment_urem_7ns_5ns_4_11_seq_1.v</spirit:name>
+        <spirit:name>hdl/verilog/seven_segment_urem_14ns_5ns_4_18_1.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
@@ -323,17 +319,12 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogbehavioralsimulation_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>hdl/verilog/seven_segment_mul_7ns_9ns_15_1_1.v</spirit:name>
+        <spirit:name>hdl/verilog/seven_segment_udiv_14ns_10ns_14_18_1.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/verilog/seven_segment_mux_164_7_1_1.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>hdl/verilog/seven_segment_urem_7ns_5ns_4_11_seq_1.v</spirit:name>
+        <spirit:name>hdl/verilog/seven_segment_urem_14ns_5ns_4_18_1.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
@@ -351,37 +342,28 @@
         <spirit:userFileType>USED_IN_out_of_context</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/vhdl/seven_segment_mul_7ns_9ns_15_1_1.vhd</spirit:name>
+        <spirit:name>hdl/vhdl/seven_segment_udiv_14ns_10ns_14_18_1.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/vhdl/seven_segment_mux_164_7_1_1.vhd</spirit:name>
-        <spirit:fileType>vhdlSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>hdl/vhdl/seven_segment_urem_7ns_5ns_4_11_seq_1.vhd</spirit:name>
+        <spirit:name>hdl/vhdl/seven_segment_urem_14ns_5ns_4_18_1.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
         <spirit:name>hdl/vhdl/seven_segment.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:userFileType>CHECKSUM_1b126c30</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_6e64b63d</spirit:userFileType>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
       <spirit:name>xilinx_vhdlbehavioralsimulation_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>hdl/vhdl/seven_segment_mul_7ns_9ns_15_1_1.vhd</spirit:name>
+        <spirit:name>hdl/vhdl/seven_segment_udiv_14ns_10ns_14_18_1.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/vhdl/seven_segment_mux_164_7_1_1.vhd</spirit:name>
-        <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>hdl/vhdl/seven_segment_urem_7ns_5ns_4_11_seq_1.vhd</spirit:name>
+        <spirit:name>hdl/vhdl/seven_segment_urem_14ns_5ns_4_18_1.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
@@ -431,7 +413,7 @@
     </spirit:parameter>
     <spirit:parameter>
       <spirit:name>clk_period</spirit:name>
-      <spirit:value spirit:id="PARAM_VALUE.clk_period" spirit:order="2">10</spirit:value>
+      <spirit:value spirit:id="PARAM_VALUE.clk_period" spirit:order="2">20</spirit:value>
     </spirit:parameter>
     <spirit:parameter>
       <spirit:name>machine</spirit:name>
@@ -443,11 +425,11 @@
     </spirit:parameter>
     <spirit:parameter>
       <spirit:name>latency</spirit:name>
-      <spirit:value spirit:id="PARAM_VALUE.latency" spirit:order="5">1</spirit:value>
+      <spirit:value spirit:id="PARAM_VALUE.latency" spirit:order="5">34</spirit:value>
     </spirit:parameter>
     <spirit:parameter>
       <spirit:name>II</spirit:name>
-      <spirit:value spirit:id="PARAM_VALUE.II" spirit:order="6">x</spirit:value>
+      <spirit:value spirit:id="PARAM_VALUE.II" spirit:order="6">1</spirit:value>
     </spirit:parameter>
   </spirit:parameters>
   <spirit:vendorExtensions>
@@ -460,8 +442,8 @@
       </xilinx:taxonomies>
       <xilinx:displayName>Seven_segment</xilinx:displayName>
       <xilinx:definitionSource>HLS</xilinx:definitionSource>
-      <xilinx:coreRevision>2114716493</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2026-07-28T11:53:08Z</xilinx:coreCreationDateTime>
+      <xilinx:coreRevision>2114721224</xilinx:coreRevision>
+      <xilinx:coreCreationDateTime>2026-07-31T18:44:40Z</xilinx:coreCreationDateTime>
       <xilinx:sdxKernelAttributes>
         <xilinx:sdx_kernel>true</xilinx:sdx_kernel>
         <xilinx:sdx_kernel_type>hls</xilinx:sdx_kernel_type>
@@ -469,10 +451,10 @@
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
       <xilinx:xilinxVersion>2022.2</xilinx:xilinxVersion>
-      <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="b6c4ce26"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="0b2be0cf"/>
-      <xilinx:checksum xilinx:scope="ports" xilinx:value="020072f1"/>
-      <xilinx:checksum xilinx:scope="parameters" xilinx:value="f1ad01a4"/>
+      <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="c86c4407"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="c5c633e8"/>
+      <xilinx:checksum xilinx:scope="ports" xilinx:value="abdaedd2"/>
+      <xilinx:checksum xilinx:scope="parameters" xilinx:value="c8eff395"/>
     </xilinx:packagingInfo>
   </spirit:vendorExtensions>
 </spirit:component>

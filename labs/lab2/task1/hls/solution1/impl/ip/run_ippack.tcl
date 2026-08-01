@@ -55,7 +55,7 @@ set Library     "hls"
 set IPName      "seven_segment_axi"
 set Version     "1.0"
 set DisplayName "seven_segment_axi"
-set Revision    "2114716528"
+set Revision    "2114721225"
 set Description "AXI4-Lite controlled seven-segment display HLS IP"
 set Device      "zynq"
 set AutoFamily  ""
@@ -72,9 +72,10 @@ set kernel_xml [file join [pwd] ../kernel/kernel.xml]
 set solution_dir "/home/urelg/vitis/lab2_task1/lab2_task1_hls/solution1"
 set debug_dir "/home/urelg/vitis/lab2_task1/lab2_task1_hls/solution1/.debug"
 set xo_hls_files_dir ""
-set hdl_module_list {seven_segment_axi_mul_7ns_34ns_40_2_1
-seven_segment_axi_urem_32s_5ns_4_36_seq_1
-seven_segment_axi_mux_164_7_1_1
+set hdl_module_list {seven_segment_axi_udiv_7ns_7ns_7_11_1
+seven_segment_axi_mul_7ns_7ns_14_1_1
+seven_segment_axi_udiv_14ns_10ns_14_18_1
+seven_segment_axi_urem_14ns_5ns_4_18_1
 seven_segment_axi_CTRL_s_axi
 seven_segment_axi
 }
@@ -99,7 +100,7 @@ set Interfaces {
         param_prefix "C_S_AXI_CTRL"
         addr_bits "6"
         port_width "AWADDR 6 WDATA 32 WSTRB 4 ARADDR 6 RDATA 32"
-        registers {{0x00 CTRL RW 0x0 {Control signals} {{ 0 1 AP_START RW 0 "Control signal Register for 'ap_start'." } { 1 1 AP_DONE R 0 "Control signal Register for 'ap_done'." } { 2 1 AP_IDLE R 0 "Control signal Register for 'ap_idle'." } { 3 1 AP_READY R 0 "Control signal Register for 'ap_ready'." } { 4 3 RESERVED_1 R 0 "Reserved.  0s on read." } { 7 1 AUTO_RESTART RW 0 "Control signal Register for 'auto_restart'." } { 8 1 RESERVED_2 R 0 "Reserved.  0s on read." } { 9 1 INTERRUPT R 0 "Control signal Register for 'interrupt'." } { 10 22 RESERVED_3 R 0 "Reserved.  0s on read." }}} {0x04 GIER RW 0x0 {Global Interrupt Enable Register} {{ 0 1 Enable RW 0 "Master enable for the device interrupt output to the system interrupt controller: 0 = Disabled, 1 = Enabled" } { 1 31 RESERVED R 0 "Reserved.  0s on read." }}} {0x08 IP_IER RW 0x0 {IP Interrupt Enable Register} {{0 1 CHAN0_INT_EN RW 0 {Enable Channel 0 (ap_done) Interrupt.  0 = Disabled, 1 = Enabled.}} {1 1 CHAN1_INT_EN RW 0 {Enable Channel 1 (ap_ready) Interrupt.  0 = Disabled, 1 = Enabled.}} {2 30 RESERVED_0 R 0 {Reserved.  0s on read.}}}} {0x0c IP_ISR RW 0x0 {IP Interrupt Status Register} {{0 1 CHAN0_INT_ST RTOW 0 {Channel 0 (ap_done) Interrupt Status. 0 = No Channel 0 interrupt, 1 = Channel 0 interrupt.}} {1 1 CHAN1_INT_ST RTOW 0 {Channel 1 (ap_ready) Interrupt Status. 0 = No Channel 1 interrupt, 1 = Channel 1 interrupt.}} {2 30 RESERVED_0 R 0 {Reserved.  0s on read.}}}} {0x10 op1 W 0x0 "Data signal of op1" {{0 7 op1 W 0 "Bit 6 to 0 of op1"} {7 25 RESERVED R 0 "Reserved.  0s on read."}}} {0x18 op2 W 0x0 "Data signal of op2" {{0 7 op2 W 0 "Bit 6 to 0 of op2"} {7 25 RESERVED R 0 "Reserved.  0s on read."}}} {0x20 op_sel W 0x0 "Data signal of op_sel" {{0 2 op_sel W 0 "Bit 1 to 0 of op_sel"} {2 30 RESERVED R 0 "Reserved.  0s on read."}}}}
+        registers {{0x10 op1 W 0x0 "Data signal of op1" {{0 7 op1 W 0 "Bit 6 to 0 of op1"} {7 25 RESERVED R 0 "Reserved.  0s on read."}}} {0x18 op2 W 0x0 "Data signal of op2" {{0 7 op2 W 0 "Bit 6 to 0 of op2"} {7 25 RESERVED R 0 "Reserved.  0s on read."}}} {0x20 op_sel W 0x0 "Data signal of op_sel" {{0 2 op_sel W 0 "Bit 1 to 0 of op_sel"} {2 30 RESERVED R 0 "Reserved.  0s on read."}}}}
         memories ""
         ctype {
             AWVALID {
@@ -213,17 +214,7 @@ set Interfaces {
             }
         }
     }
-    interrupt {
-        type "interrupt"
-        ctype {
-            INTERRUPT {
-                Type "bool"
-                Width "1"
-                Bits "1"
-            }
-        }
-    }
-    seg_tens {
+    seg {
         type "data"
         dir "out"
         width "8"
@@ -235,15 +226,15 @@ set Interfaces {
             }
         }
     }
-    seg_ones {
+    an {
         type "data"
         dir "out"
-        width "8"
+        width "4"
         ctype {
             DATA {
                 Type "null"
-                Width "8"
-                Bits "8"
+                Width "4"
+                Bits "4"
             }
         }
     }
@@ -1715,7 +1706,7 @@ if {![regexp -nocase {2014\.3.*} $vivado_ver match]} {
 ipx::create_xgui_files -logo_file misc/logo.png $core
 
 ## System Info
-set user_parameters_list {clk_period 10 machine 64 combinational 0 latency 2 II x}
+set user_parameters_list {clk_period 20 machine 64 combinational 0 latency 44 II 1}
 foreach {user_para value} $user_parameters_list {
     incr user_parameter_order
     set user_para_value [ipx::add_user_parameter $user_para $core]

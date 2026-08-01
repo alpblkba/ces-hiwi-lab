@@ -4,8 +4,8 @@ theme: ces-kit
 paginate: true
 size: 16:9
 lang: en
-footer: "Lab 2 — Processor-controlled HLS peripheral"
-title: "Lab 2: HLS IP integration and processor-side control"
+footer: "Lab 2 — HLS calculator as an AXI peripheral"
+title: "Lab 2: A calculator in HLS, controlled by the processor"
 description: "KIT CES — Customized Embedded Processors Lab, Lab 2 (Lab 2.1 Vivado integration + Lab 2.2 Vitis software control)"
 headingDivider: 0
 ---
@@ -13,26 +13,18 @@ headingDivider: 0
 <!--
 ================================================================================
  Lab 2 deck — KIT / Chair of Embedded Systems (CES)
- Condensed from Lab2.pptx (48 slides -> 17 content slides + title + 2 dividers).
+ Source material: github.com/alpblkba/ces-hiwi-lab (labs/lab2)
 
- SCOPE NOTE
-   This deck covers the flow that exists in the repository today:
-   a single-digit value 0-9 written by software through AXI4-Lite.
-   The planned two-operand calculator variant is a separate revision.
+ TARGET LENGTH: 15 content slides (feedback: "10-15 pages, not 40")
 
- WHAT WAS CUT relative to Lab2.pptx
-   - the three "what is AXI" slides            -> merged into slide 4
-   - the generic Vivado new-project walkthrough -> one slide (9)
-   - repeated "external port naming" warnings   -> stated once, slide 13
-   - separate synthesis / implementation / bitstream / XSA slides -> slide 15
-   - the two Vitis platform+application slides and both build slides -> 16 and 18
-   - all prose paragraphs longer than two lines -> rewritten as 3-4 bullets
+ DESIGN NOTE
+   Lab 2 deliberately reuses the Lab 1 display block unchanged. The whole
+   teaching point is that students should be able to derive this lab from
+   their own Lab 1 solution by adding pragmas and one switch statement.
 
  SCREENSHOT CONVENTION
-   Each <div class="shot"> is a reserved slot. Replace it with
+   Every <div class="shot"> is a reserved slot. Replace the whole div with
        ![w:620](img/NN-name.png)
-   when the real screenshot is available. Most images already exist in
-   Lab2.pptx and can be re-exported from there at the listed names.
 
  BUILD
    marp lab2-axi-hls-peripheral.md --theme theme/ces-kit.css -o lab2.pdf
@@ -43,9 +35,9 @@ headingDivider: 0
 <!-- _class: title -->
 <!-- _paginate: false -->
 
-# Lab 2: Processor-controlled HLS peripheral
+# Lab 2: A calculator in HLS
 
-## From an HLS function to an AXI4-Lite IP driven by software
+## The Lab 1 display block, now driven by the processor
 
 Customized Embedded Processors Lab &nbsp;·&nbsp; Chair of Embedded Systems (CES)
 
@@ -58,325 +50,256 @@ Vitis HLS · Vivado · Vitis 2022.2 &nbsp;·&nbsp; Blackboard Zynq-7000 (`xc7z00
 <div class="shot">
 <b>img/02-system-overview.png</b>
 Block diagram: ARM PS → AXI Interconnect →
-seven_segment_axi → display
-<small>reuse the diagram from Lab2.pptx slide 8</small>
+seven_segment_axi → four-digit display
 </div>
 
-- **Lab 2.1** — turn the Lab 1 decoder into an AXI4-Lite IP and integrate it into a Zynq block design.
-- **Lab 2.2** — control that hardware from a C program running on the ARM core.
-- The displayed value is chosen by **software at runtime**, not hardcoded in the hardware design.
-- Still no Verilog or VHDL: the decoder logic remains C/C++.
+- You type two numbers and an operation into a **terminal**.
+- The ARM processor sends them to your **HLS block** over AXI4-Lite.
+- The block computes the result and shows it on the **seven-segment display**.
+- Still no Verilog: the arithmetic and the display logic are both C++.
+
+---
+
+## What actually changes from Lab 1
+
+<div class="flow">Lab 1                                Lab 2
+--------------------------------     --------------------------------
+one input: value                     three inputs: op1, op2, op_sel
+#pragma ... ap_none port=value       #pragma ... s_axilite port=op1
+                                     #pragma ... s_axilite port=op2
+                                     #pragma ... s_axilite port=op_sel
+                                     + one switch statement (the maths)
+
+segment table                        IDENTICAL
+active-low conversion                IDENTICAL
+tick / pos scan registers            IDENTICAL
+*an = ~(1 << pos)                    IDENTICAL
+#pragma HLS PIPELINE II=1            IDENTICAL</div>
+
+<div class="note"><b>This is the point of the lab.</b> If your Lab 1 works, Lab 2 is three pragmas plus the arithmetic. The display half is not rewritten — it is reused.</div>
 
 ---
 
 ## Why AXI4-Lite?
 
-- The ARM processor **cannot call** hardware logic like a C function. The IP must appear as a **memory-mapped peripheral**.
-- Software writes a value to a register address; the fabric decodes that address and drives the display.
-- **AXI4-Lite** is the right choice here: a few control registers, no high-bandwidth streaming.
+- The ARM core **cannot call** hardware like a C function. The block must look like **memory**.
+- Software writes to an address; the fabric decodes it and hands the value to your logic.
+- **AXI4-Lite** fits: a handful of control registers, no streaming bandwidth needed.
 
 | Interface | Use |
 |-----------|-----|
-| Full AXI4 | high-performance, memory-mapped burst transfers |
-| **AXI4-Lite** | **simple control/status register access — this lab** |
-| AXI4-Stream | direct data streaming, no addresses |
+| Full AXI4 | high-performance burst transfers |
+| **AXI4-Lite** | **simple register access — this lab** |
+| AXI4-Stream | continuous data, no addresses |
 
-<div class="flow center">ARM processor  →  AXI Interconnect  →  AXI4-Lite slave (HLS IP)  →  7-segment display</div>
-
----
-
-## What you will do
-
-<div class="flow">Lab 2.1 — hardware
-  1. copy the Lab 1 decoder into new Lab 2 source files
-  2. add AXI4-Lite interface pragmas, rename the top function
-  3. run C synthesis, inspect the generated interface
-  4. export the result as a Vivado IP
-  5. build a Zynq block design, connect AXI, make seg/an external
-  6. assign an address, generate the bitstream, export the XSA
-
-Lab 2.2 — software
-  7. create a Vitis platform from the XSA
-  8. write a C application that writes the digit register
-  9. run it on the board and observe the display</div>
-
-<div class="note"><b>Deliverable.</b> A working board demo plus a one-paragraph answer to: <i>which register does the software write, and what does the hardware compute?</i></div>
+<div class="flow center">ARM processor  →  AXI Interconnect  →  AXI4-Lite slave (HLS IP)  →  display</div>
 
 ---
 
-## HLS: new source files for Lab 2
-
-<div class="shot">
-<b>img/05-new-source-files.png</b>
-Vitis HLS Explorer, right-click Source →
-New File, showing
-<code>seven_segment_axi.cpp/.h</code>
-</div>
-
-- New HLS project, then **create new files** — do not add the Lab 1 files as linked resources.
-- `seven_segment_axi.cpp` and `seven_segment_axi.h`; copy the Lab 1 decoder body into them.
-- Lab 1 stays untouched and still works; Lab 2 evolves independently.
-- A testbench is optional here — C simulation may be skipped and you go straight to C synthesis.
-
----
-
-## HLS: the AXI4-Lite interface
+## The new interface
 
 ```cpp
-void seven_segment_axi(ap_uint<4> digit,
-                       ap_uint<8> *seg,
-                       ap_uint<4> *an) {
-#pragma HLS INTERFACE s_axilite port=digit  bundle=CTRL
+void seven_segment_axi(ap_uint<7> op1, ap_uint<7> op2, ap_uint<2> op_sel,
+                       ap_uint<8> *seg, ap_uint<4> *an) {
+#pragma HLS INTERFACE s_axilite port=op1    bundle=CTRL
+#pragma HLS INTERFACE s_axilite port=op2    bundle=CTRL
+#pragma HLS INTERFACE s_axilite port=op_sel bundle=CTRL
 #pragma HLS INTERFACE ap_none   port=seg
 #pragma HLS INTERFACE ap_none   port=an
-#pragma HLS INTERFACE s_axilite port=return bundle=CTRL
+#pragma HLS INTERFACE ap_ctrl_none port=return
+#pragma HLS PIPELINE II=1
+```
 
-    ap_uint<7> pattern_active_high;   // Lab 1 switch-case decoder
+- Only the three **inputs** are memory-mapped. `seg` and `an` stay plain wires.
+- `ap_ctrl_none` keeps the block **free-running**, so the display never stops scanning.
+- Operands are 0…99; `op_sel` selects the operation.
 
-    ap_uint<8> pattern_active_low;
-    pattern_active_low.range(6, 0) = ~pattern_active_high;
-    pattern_active_low[7] = 1;        // decimal point off (active-low)
+---
 
-    *seg = pattern_active_low;
-    *an  = 0b1110;                    // enable one digit (active-low)
+## The arithmetic, and its edge cases
+
+```cpp
+switch (op_sel) {
+    case OP_ADD: result = op1 + op2; break;   // 0
+    case OP_SUB: result = op1 - op2; break;   // 1
+    case OP_MUL: result = op1 * op2; break;   // 2
+    default:                                  // 3 = divide
+        if (op2 == 0) error = true;           // no defined result
+        else result = op1 / op2;
 }
 ```
 
-- Also rename the include guard in the header to `SEVEN_SEGMENT_AXI_H`.
-- The decoding logic itself is **unchanged** from Lab 1.
+- **Negative** results (subtraction) show a leading minus sign — segment G alone.
+- **Division by zero** and anything that will not fit shows `----`.
+- The display always has a **defined state**: hardware cannot throw an exception.
+
+<div class="note">Range check: <code>99 × 99 = 9801</code> still fits on four digits, so multiplication never overflows here.</div>
 
 ---
 
-## HLS: what the pragmas produce
+## The register map
 
-| Port | Interface | Driven by |
-|------|-----------|-----------|
-| `digit` | `s_axilite`, bundle `CTRL` | ARM processor, over AXI4-Lite |
-| `seg[7:0]` | `ap_none` | FPGA fabric → display cathodes + DP |
-| `an[3:0]` | `ap_none` | FPGA fabric → digit enable / anodes |
-| `return` | `s_axilite`, bundle `CTRL` | block control register (start/done) |
+After synthesis, Vitis HLS generates `xseven_segment_axi_hw.h`:
 
-- Only `digit` is memory-mapped. **`seg` and `an` are direct hardware outputs.**
-- They will be made external in the block design and pinned through the XDC file.
-- The Blackboard display is active-low, so the Lab 1 active-high pattern is inverted once, at the output.
+| Offset | Register |
+|--------|----------|
+| `0x00` … `0x0c` | reserved |
+| `0x10` | `op1` |
+| `0x18` | `op2` |
+| `0x20` | `op_sel` |
+
+<div class="warn">Because the block is <code>ap_ctrl_none</code>, there is <b>no <code>ap_start</code> register</b>. The software never starts the block and never polls for completion — it only writes these three values.</div>
+
+- Always read these offsets from the generated header, never guess them.
 
 ---
 
-## HLS: synthesize and export the IP
+## Synthesize and export
 
-<div class="shot-row">
 <div class="shot">
-<b>img/08a-synth-axi-report.png</b>
-Synthesis Summary showing the
-<code>s_axi_CTRL</code> interface and the
-register offsets
-</div>
-<div class="shot">
-<b>img/08b-export-ip.png</b>
-Export RTL dialog:
-Vendor <code>ces.kit.edu</code>,
-Library <code>hls</code>, Version 1.0
-</div>
+<b>img/08-synth-axi-interface.png</b>
+Synthesis report Interface table showing
+the s_axi_CTRL ports plus seg / an,
+and Interval = 1
 </div>
 
-- Project → Project Settings → Synthesis: top function `seven_segment_axi`, then **Run C Synthesis**.
-- The report must show an AXI4-Lite slave named **`s_axi_CTRL`** and note the **`digit` offset (0x10)** — you need it in software.
-- Export as **Vivado IP (.zip)**; Display Name `seven_segment_axi`, Taxonomy `/UserIP`.
-- Verify `solution1/impl/export.zip` and `solution1/impl/ip/component.xml`.
+- Top function `seven_segment_axi`, part `xc7z007sclg400-1`, clock 20 ns.
+- The report must show an AXI4-Lite slave named **`s_axi_CTRL`**, and `seg` / `an` as `ap_none`.
+- Confirm **Interval = 1** again — same flicker trap as Lab 1.
+- **Export RTL** as Vivado IP; verify `solution1/impl/ip/component.xml`.
 
 ---
 
 ## Vivado: project and constraints
 
-<div class="shot">
-<b>img/09-vivado-project-xdc.png</b>
-New Project summary page +
-the Blackboard XDC file open,
-seg / an pin constraints visible
-</div>
+- New RTL project, part **`xc7z007sclg400-1`**, **no** design sources.
+- Add the **Blackboard XDC**: it maps `seg[7:0]` and `an[3:0]` to the display pins.
+- No extra Verilog or VHDL is added in this lab — the anode logic lives in the HLS block.
 
-- New RTL project, e.g. `~/vivado/lab2_task1`; part **`xc7z007sclg400-1`**. Add **no** design sources.
-- Add the **Blackboard XDC** constraints file — at project creation or any time before bitstream generation.
-- The XDC maps the logical ports `seg[7:0]` and `an[3:0]` to the physical display pins.
-- Without it Vivado can still synthesize, but it does not know which pins drive the display.
+```text
+seg[0] → K14 (SSEG_CA)  …  seg[7] → K18 (SSEG_DP)
+an[0]  → K19 (SSEG_AN0) …  an[3]  → L16 (SSEG_AN3)
+```
 
----
-
-## Vivado: block design and Zynq PS
-
-<div class="shot">
-<b>img/10-block-automation.png</b>
-Diagram after Run Block Automation,
-ZYNQ7 Processing System with
-DDR and FIXED_IO external
-</div>
-
-- Flow Navigator → **Create Block Design**, name `seven_segment`.
-- **Add IP → ZYNQ7 Processing System**, then **Run Block Automation**.
-- Accept the defaults: Make Interface External = `FIXED_IO`, `DDR`; cross triggers disabled.
-- `DDR` and `FIXED_IO` must be external so the PS can reach board DDR and its fixed pins.
+<div class="note">This is why the scan was written in HLS: the block design stays simple, and the lab never asks you to write RTL.</div>
 
 ---
 
-## Vivado: import the HLS IP
-
-<div class="shot-row">
-<div class="shot">
-<b>img/11a-ip-repository.png</b>
-Settings → IP → Repository,
-pointing at
-<code>solution1/impl/ip</code>
-</div>
-<div class="shot">
-<b>img/11b-ip-catalog.png</b>
-IP Catalog → UserIP →
-<code>seven_segment_axi</code>
-</div>
-</div>
-
-- **Tools → Settings → IP → Repository**, add the exported `ip/` directory (not the `.zip`, not `impl/`).
-- After a refresh the IP appears in the **IP Catalog** under **UserIP**.
-- Back in the Diagram: **Add IP → `seven_segment_axi`**.
-- IP not showing up = wrong directory or catalog not refreshed. Nothing else.
-
----
-
-## Vivado: Connection Automation
+## Vivado: block design
 
 <div class="shot">
-<b>img/12-connection-automation.png</b>
+<b>img/10-block-design.png</b>
 Diagram after Run Connection Automation:
-PS → AXI Interconnect →
+ZYNQ7 PS → AXI Interconnect →
 seven_segment_axi_0/s_axi_CTRL
 </div>
 
-- **Run Connection Automation**, master `/processing_system7_0/M_AXI_GP0`, Bridge IP = **New AXI Interconnect**, all clocks **Auto**.
-- Vivado inserts the interconnect and wires clock and reset automatically.
-- Result: `M_AXI_GP0` → AXI Interconnect → `seven_segment_axi_0/s_axi_CTRL`.
-- `seg[7:0]` and `an[3:0]` stay unconnected here — they are not part of the AXI path.
+- **Create Block Design**, add **ZYNQ7 Processing System**, then **Run Block Automation**.
+- **Settings → IP → Repository**: add the exported `solution1/impl/ip` directory.
+- **Add IP → `seven_segment_axi`** from the catalog under *UserIP*.
+- **Run Connection Automation** to wire AXI, clock and reset.
 
 ---
 
-## Vivado: make `seg` and `an` external
+## Vivado: external ports and address
 
 <div class="shot">
-<b>img/13-external-ports.png</b>
-Right-click on the seg / an pins →
-Make External, plus the resulting
-external port names
+<b>img/11-external-ports.png</b>
+Right-click seg / an → Make External,
+plus the Address Editor showing
+s_axi_CTRL at 0x4000_0000
 </div>
 
-- Right-click each output pin → **Make External**.
-- These are physical outputs, not registers: software never touches them.
+- Right-click the `seg` and `an` pins → **Make External**.
+- Address Editor: assign `s_axi_CTRL` to **`0x4000_0000`**, range 64K.
 
-<div class="warn"><b>Naming matters.</b> The external ports must be called exactly <code>seg[7:0]</code> and <code>an[3:0]</code> to match the XDC file. If Vivado creates <code>seg_0[7:0]</code>, rename it via right-click → <b>External Port Properties</b>.</div>
+<div class="warn"><b>Naming matters.</b> The external ports must be exactly <code>seg</code> and <code>an</code> to match the XDC. If Vivado creates <code>seg_0</code>, rename it in External Port Properties.</div>
 
 ---
 
-## Vivado: address assignment
+## Vivado: build and export
 
-<div class="shot">
-<b>img/14-address-editor.png</b>
-Address Editor showing
-<code>s_axi_CTRL</code> at
-<code>0x4000_0000</code>, range 64K
-</div>
+- **Create HDL Wrapper**, then **Run Synthesis → Implementation → Generate Bitstream**.
+- **File → Export → Export Hardware**, *include bitstream* → `seven_segment_wrapper.xsa`.
 
-- Address Editor: `seven_segment_axi_0/s_axi_CTRL` → **`0x4000_0000 – 0x4000_FFFF`**.
-- The HLS register offsets are added to this base:
+<div class="flow center">synthesis = netlist   ·   implementation = place & route + timing   ·   bitstream = FPGA configuration</div>
 
-<div class="flow center">digit register  =  0x4000_0000  +  0x10  =  0x4000_0010</div>
-
-- Then **Tools → Validate Design** (F6). Fix the first critical warning before anything else.
+<div class="warn">Whenever the HLS code changes, the IP must be re-exported, the block design refreshed (<b>Report IP Status → Upgrade</b>), and the bitstream and XSA regenerated. A stale XSA is the most common reason a working design misbehaves on the board.</div>
 
 ---
 
-## Vivado: build and export the hardware
+## Vitis: platform and application
 
-<div class="shot-row">
 <div class="shot">
-<b>img/15a-design-runs.png</b>
-Design Runs tab:
-synthesis and implementation
-both complete
-</div>
-<div class="shot">
-<b>img/15b-export-hardware.png</b>
-Export Hardware wizard with
-<b>Include bitstream</b> selected
-</div>
+<b>img/13-vitis-projects.png</b>
+Create Platform Project from the XSA,
+then New Application Project on
+ps7_cortexa9_0, Empty Application
 </div>
 
-- Right-click the block design → **Create HDL Wrapper** (let Vivado manage it).
-- **Run Synthesis → Run Implementation → Generate Bitstream**, defaults throughout.
-- **File → Export → Export Hardware**, *Include bitstream*, producing `seven_segment_wrapper.xsa`.
-- Synthesis = netlist. Implementation = place & route + timing. Bitstream = the FPGA configuration.
+- Platform project from `seven_segment_wrapper.xsa`, then **Build Project**.
+- Application project `seven_segment_app`, processor `ps7_cortexa9_0`, standalone, empty.
+- The XSA tells Vitis which processor exists and **where your IP is mapped** — platform first.
 
 ---
 
-## Vitis: platform and application project
-
-<div class="shot-row">
-<div class="shot">
-<b>img/16a-platform-project.png</b>
-Create Platform Project from
-the exported XSA
-</div>
-<div class="shot">
-<b>img/16b-application-project.png</b>
-New Application Project:
-processor <code>ps7_cortexa9_0</code>,
-Empty Application
-</div>
-</div>
-
-- `source .../Vitis/2022.2/settings64.sh && vitis`, workspace `~/vitis/lab2_task2`.
-- **Platform project** `seven_segment_platform` from `seven_segment_wrapper.xsa`, then **Build Project**.
-- **Application project** `seven_segment_app`, processor `ps7_cortexa9_0`, domain `standalone`, Empty Application.
-- The XSA is what tells Vitis which processor exists and **where the IP is mapped** — hence platform first.
-
----
-
-## Vitis: what your application must do
+## Vitis: the software
 
 ```c
-#include "xparameters.h"
-#include "xil_io.h"
-#include "sleep.h"
+#define CALC_BASEADDR   XPAR_SEVEN_SEGMENT_AXI_0_S_AXI_CTRL_BASEADDR
+#define OP1_REG_OFFSET    0x10
+#define OP2_REG_OFFSET    0x18
+#define OPSEL_REG_OFFSET  0x20
 
-#define SEVEN_SEG_BASE   XPAR_SEVEN_SEGMENT_AXI_0_S_AXI_CTRL_BASEADDR
-#define DIGIT_OFFSET     0x10          /* from the HLS register map */
+op1 = read_operand("First number");     /* over the terminal */
+op2 = read_operand("Second number");
+op_sel = read_operation();
 
-int main(void) {
-    while (1) {
-        for (u32 d = 0; d < 10; d++) {
-            Xil_Out32(SEVEN_SEG_BASE + DIGIT_OFFSET, d);
-            usleep(500000);
-        }
-    }
-}
+Xil_Out32(CALC_BASEADDR + OP1_REG_OFFSET,   op1);
+Xil_Out32(CALC_BASEADDR + OP2_REG_OFFSET,   op2);
+Xil_Out32(CALC_BASEADDR + OPSEL_REG_OFFSET, op_sel);
 ```
 
-- You write this file yourself (`seven_segment_app/src/seven_segment_app.c`).
-- Use the **generated** base-address macro from `xparameters.h` — never a hardcoded address.
+- Three writes, and the display updates on the very next clock cycle.
+- Use the **generated** base-address macro from `xparameters.h` — never a literal address.
+- Validate the operands in software too: a 7-bit register silently truncates 100 to 4.
 
 ---
 
 ## Run on the board
 
 <div class="shot">
-<b>img/18-launch-on-hardware.png</b>
-Right-click app → Run As →
-Launch on Hardware, plus the
-console output
+<b>img/15-board-result.png</b>
+Terminal showing the entered operands
+next to a photo of the display
+holding the result
 </div>
 
-- **Build Project** → `seven_segment_app/Debug/seven_segment_app.elf`.
-- **Run As → Launch on Hardware**: Vitis programs the bitstream over JTAG, then starts the ELF.
-- **Expected behaviour:** the display cycles 0, 1, 2 … 9 with a visible delay.
+- **Run As → Launch on Hardware**: Vitis programs the bitstream, then starts the ELF.
+- Open a serial terminal at **115200 baud** to type the operands.
+- Try `40 + 2` → `42`, then `5 - 9` → `-4`, then `7 / 0` → `----`.
 
-<div class="flow">[ok] AXI4-Lite HLS IP exported          [ok] platform + application built
-[ok] block design validated             [ok] ELF launched on ps7_cortexa9_0
-[ok] bitstream and XSA generated        [ok] display driven from software</div>
+<div class="flow">[ok] AXI4-Lite IP exported            [ok] platform + application built
+[ok] block design validated           [ok] operands accepted over the terminal
+[ok] bitstream and XSA generated      [ok] result correct on the display</div>
 
-<div class="note"><b>Wrong digit on the display?</b> Check the active-low inversion and the <code>seg</code>/<code>an</code> pin constraints — not the software.</div>
+---
+
+## Checklist and deliverables
+
+<div class="flow">[ok] Lab 1 display block reused unchanged
+[ok] three AXI4-Lite pragmas added, top function renamed
+[ok] arithmetic implemented, division by zero handled
+[ok] Interval = 1 confirmed in the synthesis report
+[ok] IP exported, imported, address assigned
+[ok] bitstream and XSA regenerated from the current IP
+[ok] software writes op1 / op2 / op_sel and the display follows</div>
+
+| Reference result | Value |
+|------------------|-------|
+| HLS Interval (II) | 1, Fmax ~81 MHz |
+| Post-route timing | WNS +12.7 ns, 0 failing endpoints |
+| Utilisation | 7.4 % LUT, 4.1 % FF, 1 DSP, 0 BRAM |
+| Bonded I/O | 12 (8 segment + 4 anode) |
+
+<div class="note"><b>Deliverables.</b> The HLS sources, the block design, the XSA, the Vitis application, a board demo, and a short answer to: <i>which registers does the software write, and what does the hardware compute?</i></div>

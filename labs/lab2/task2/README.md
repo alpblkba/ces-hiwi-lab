@@ -1,117 +1,101 @@
-# Lab 2.2 — Processor-Side Interaction and System Validation
+# Lab 2.2 — Driving the calculator from software
 
-    ## Objective
+## Objective
 
-    Validate the generated hardware from the processor/software side and document the full bring-up path.
+Write a C program that runs on the ARM processor, reads two numbers and an
+operation from a terminal, and sends them to the HLS calculator built in
+Lab 2.1. The result appears on the seven-segment display.
 
-    ## Background
+This is where the lab becomes interactive. The HLS block never reads a keyboard —
+it cannot. The processor does that and hands the values over through registers.
 
-    A lab based on customized embedded processors should not stop at isolated hardware generation. Students should understand how a hardware block becomes part of a system, how software can interact with it, and why the hardware handoff must match the actual bitstream and platform configuration.
+## The hardware/software boundary
 
-    This task is part of the customized embedded processors lab rewrite. The goal is to create material that future students can follow from a clean start, without relying on undocumented instructor knowledge or fragile GUI state.
+```text
+you type at a terminal
+        │
+        ▼
+C program on the ARM core          (software, this task)
+        │  Xil_Out32(...)
+        ▼
+AXI4-Lite registers
+        │
+        ▼
+HLS calculator + display scan      (hardware, Lab 2.1)
+        │
+        ▼
+seven-segment display
+```
 
-    ## What students should learn
+Everything above the registers is software you can debug with `printf`.
+Everything below is a circuit that runs whether or not the processor is busy.
 
-    - Vitis application project structure
-- BSP awareness
-- hardware handoff files
-- software-controlled hardware access
-- system-level validation
-- distinguishing hardware bugs from software/platform bugs
-- student-facing explanation and oral defense questions
+## What the software has to do
 
-    ## Expected starting point
+Three register writes. That is the entire hardware interaction:
 
-    Students are expected to have:
+```c
+#define CALC_BASEADDR    XPAR_SEVEN_SEGMENT_AXI_0_S_AXI_CTRL_BASEADDR
+#define OP1_REG_OFFSET    0x10
+#define OP2_REG_OFFSET    0x18
+#define OPSEL_REG_OFFSET  0x20
 
-    - access to the assigned lab machine or remote development node
-    - a cloned copy of this repository
-    - basic familiarity with Linux shell commands
-    - basic understanding of C/C++ functions
-    - basic awareness of FPGA design flow terminology
-    - no requirement to already know HLS in depth
+Xil_Out32(CALC_BASEADDR + OP1_REG_OFFSET,   op1);
+Xil_Out32(CALC_BASEADDR + OP2_REG_OFFSET,   op2);
+Xil_Out32(CALC_BASEADDR + OPSEL_REG_OFFSET, op_sel);
+```
 
-    ## Expected outcome
+There is **no start and no polling**. Because the HLS block was built with
+`ap_ctrl_none` it is free-running: it picks up the new values on its next clock
+cycle and keeps refreshing the display on its own.
 
-    At the end of this task, students should be able to explain:
+Always use the generated `XPAR_...` macro from `xparameters.h`. Never write a
+literal address — the macro follows whatever address the block design assigned.
 
-    - what they built or verified
-    - which tool generated which artifact
-    - where the hardware/software boundary is
-    - how inputs and outputs are represented
-    - how the design was built, exported, integrated, or tested
-    - what common failure modes they encountered
-    - what they would check first when something fails
+## Validate the input in software
 
-    ## Student deliverables
+The hardware registers are only 7 bits wide. Writing `100` into a 7-bit register
+does not produce an error; it silently stores `100 & 0x7F`. Range-check the
+operands before writing them, and reject an unknown operation.
 
-    - description of hardware handoff artifact used
-- software project or application structure notes
-- BSP/platform generation notes
-- validation plan
-- observed board or runtime behavior
-- debug notes for mismatches between hardware and software
-- final short explanation of the complete system
+Division by zero is handled in hardware (the display shows `----`), but telling
+the user about it in the terminal is friendlier.
 
-    ## Suggested workflow
+## Workflow
 
-    1. identify the exported hardware handoff file
-2. create or update the Vitis platform project
-3. regenerate BSP if hardware changed
-4. create or update the application project
-5. build the software side
-6. program or connect to the target as required
-7. run the validation steps
-8. document whether the observed behavior matches the expected hardware design
+1. Start Vitis with a workspace such as `~/vitis/lab2_task2`.
+2. Create a **platform project** from the `seven_segment_wrapper.xsa` produced in
+   Lab 2.1, then build it.
+3. Create an **application project** on `ps7_cortexa9_0`, standalone, empty.
+4. Write `seven_segment_app.c` and build it.
+5. Connect the board, open a serial terminal at **115200 baud**.
+6. **Run As → Launch on Hardware**: Vitis programs the bitstream and starts the ELF.
 
-    ## Suggested repository layout
+## Test cases worth trying
 
-    ```text
-    lab2/task2/
-    ├── README.md
-    ├── commands.md
-    ├── instructor_notes.md
-    ├── questions.md
-    └── expected_observations.md
-    ```
+| Input | Expected display |
+|-------|------------------|
+| `40 + 2` | `42` |
+| `9 - 4` | `5` |
+| `5 - 9` | `-4` (minus sign) |
+| `99 × 99` | `9801` (all four digits) |
+| `7 / 0` | `----` |
 
-    ## Implementation notes
+## Debugging: is it hardware or software?
 
-    This documentation intentionally avoids providing final C/C++ implementation code. The lab should require students to reason about the design and produce the implementation themselves.
+The terminal output tells you what the software *sent*. The display tells you
+what the hardware *did*. Compare them before changing any code.
 
-    A good solution should still be structured around:
+- Nothing on the display at all → bitstream not programmed, or the XSA is older
+  than the hardware.
+- The terminal works but the display never changes → check the register offsets
+  against the generated `xseven_segment_axi_hw.h`.
+- Wrong digits, right value → the segment table or its bit order, not the software.
+- Flickering → the initiation interval in the HLS synthesis report, not the software.
 
-    - one clearly identified design entry point
-    - simple and explainable input/output behavior
-    - minimal hidden state
-    - deterministic behavior for every relevant case
-    - build steps that can be reproduced from a clean checkout
-    - logs and reports that can be inspected after failure
+## Expected result
 
-    ## Common risks
-
-    - using an old XSA or hardware platform
-- not regenerating BSP after hardware changes
-- assuming software rebuild updates hardware automatically
-- not checking whether the programmed bitstream matches the expected design
-- debugging software while the block design is invalid
-- not documenting the complete path from HLS to board behavior
-
-    ## Reflection questions
-
-    1. What is the input of this task?
-    2. What is the output?
-    3. Which part is generated automatically by the tool?
-    4. Which part is written or configured by the student?
-    5. What does the FPGA implement physically?
-    6. What would change if the design were extended?
-    7. Which build artifact is needed by the next stage?
-    8. What would you check first if the design does not work?
-
-    ## Current status
-
-    - task structure prepared
-    - student-facing explanation drafted
-    - build/run path documented separately
-    - troubleshooting collected in the shared guide
-    - implementation intentionally left for the lab development phase
+- A platform and application project that build from the current XSA.
+- A working board demo covering the test cases above.
+- A short answer to: *which registers does the software write, and what does the
+  hardware compute?*

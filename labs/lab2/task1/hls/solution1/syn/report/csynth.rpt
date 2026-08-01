@@ -4,7 +4,7 @@
 == Synthesis Summary Report of 'seven_segment_axi'
 ================================================================
 + General Information: 
-    * Date:           Tue Jul 28 14:25:22 2026
+    * Date:           Fri Jul 31 20:45:16 2026
     * Version:        2022.2 (Build 3670227 on Oct 13 2022)
     * Project:        lab2_task1_hls
     * Solution:       solution1 (Vivado IP Flow Target)
@@ -15,12 +15,12 @@
 + Performance & Resource Estimates: 
     
     PS: '+' for module; 'o' for loop; '*' for dataflow
-    +---------------------+------+------+---------+---------+----------+---------+------+----------+------+--------+----------+----------+-----+
-    |       Modules       | Issue|      | Latency | Latency | Iteration|         | Trip |          |      |        |          |          |     |
-    |       & Loops       | Type | Slack| (cycles)|   (ns)  |  Latency | Interval| Count| Pipelined| BRAM |   DSP  |    FF    |    LUT   | URAM|
-    +---------------------+------+------+---------+---------+----------+---------+------+----------+------+--------+----------+----------+-----+
-    |+ seven_segment_axi  |     -|  0.39|       37|  370.000|         -|       38|     -|        no|     -|  1 (1%)|  715 (2%)|  768 (5%)|    -|
-    +---------------------+------+------+---------+---------+----------+---------+------+----------+------+--------+----------+----------+-----+
+    +---------------------+------+------+---------+---------+----------+---------+------+----------+------+----+-----------+------------+-----+
+    |       Modules       | Issue|      | Latency | Latency | Iteration|         | Trip |          |      |    |           |            |     |
+    |       & Loops       | Type | Slack| (cycles)|   (ns)  |  Latency | Interval| Count| Pipelined| BRAM | DSP|     FF    |     LUT    | URAM|
+    +---------------------+------+------+---------+---------+----------+---------+------+----------+------+----+-----------+------------+-----+
+    |+ seven_segment_axi  |     -|  2.31|       44|  880.000|         -|        1|     -|       yes|     -|   -|  2469 (8%)|  1732 (12%)|    -|
+    +---------------------+------+------+---------+---------+----------+---------+------+----------+------+----+-----------+------------+-----+
 
 
 ================================================================
@@ -34,35 +34,30 @@
 +------------+------------+---------------+--------+----------+
 
 * S_AXILITE Registers
-+------------+----------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
-| Interface  | Register | Offset | Width | Access | Description                      | Bit Fields                                                           |
-+------------+----------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
-| s_axi_CTRL | CTRL     | 0x00   | 32    | RW     | Control signals                  | 0=AP_START 1=AP_DONE 2=AP_IDLE 3=AP_READY 7=AUTO_RESTART 9=INTERRUPT |
-| s_axi_CTRL | GIER     | 0x04   | 32    | RW     | Global Interrupt Enable Register | 0=Enable                                                             |
-| s_axi_CTRL | IP_IER   | 0x08   | 32    | RW     | IP Interrupt Enable Register     | 0=CHAN0_INT_EN 1=CHAN1_INT_EN                                        |
-| s_axi_CTRL | IP_ISR   | 0x0c   | 32    | RW     | IP Interrupt Status Register     | 0=CHAN0_INT_ST 1=CHAN1_INT_ST                                        |
-| s_axi_CTRL | op1      | 0x10   | 32    | W      | Data signal of op1               |                                                                      |
-| s_axi_CTRL | op2      | 0x18   | 32    | W      | Data signal of op2               |                                                                      |
-| s_axi_CTRL | op_sel   | 0x20   | 32    | W      | Data signal of op_sel            |                                                                      |
-+------------+----------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
++------------+----------+--------+-------+--------+-----------------------+
+| Interface  | Register | Offset | Width | Access | Description           |
++------------+----------+--------+-------+--------+-----------------------+
+| s_axi_CTRL | op1      | 0x10   | 32    | W      | Data signal of op1    |
+| s_axi_CTRL | op2      | 0x18   | 32    | W      | Data signal of op2    |
+| s_axi_CTRL | op_sel   | 0x20   | 32    | W      | Data signal of op_sel |
++------------+----------+--------+-------+--------+-----------------------+
 
 * Other Ports
 +-----------+---------+----------+
 | Interface | Mode    | Bitwidth |
 +-----------+---------+----------+
-| seg_ones  | ap_none | 8        |
-| seg_tens  | ap_none | 8        |
+| an        | ap_none | 4        |
+| seg       | ap_none | 8        |
 +-----------+---------+----------+
 
 * TOP LEVEL CONTROL
-+-----------+------------+-----------+
-| Interface | Type       | Ports     |
-+-----------+------------+-----------+
-| ap_clk    | clock      | ap_clk    |
-| ap_rst_n  | reset      | ap_rst_n  |
-| interrupt | interrupt  | interrupt |
-| ap_ctrl   | ap_ctrl_hs |           |
-+-----------+------------+-----------+
++-----------+--------------+----------+
+| Interface | Type         | Ports    |
++-----------+--------------+----------+
+| ap_clk    | clock        | ap_clk   |
+| ap_rst_n  | reset        | ap_rst_n |
+| ap_ctrl   | ap_ctrl_none |          |
++-----------+--------------+----------+
 
 
 ================================================================
@@ -75,8 +70,8 @@
 | op1      | in        | ap_uint<7>  |
 | op2      | in        | ap_uint<7>  |
 | op_sel   | in        | ap_uint<2>  |
-| seg_tens | out       | ap_uint<8>* |
-| seg_ones | out       | ap_uint<8>* |
+| seg      | out       | ap_uint<8>* |
+| an       | out       | ap_uint<4>* |
 +----------+-----------+-------------+
 
 * SW-to-HW Mapping
@@ -86,22 +81,26 @@
 | op1      | s_axi_CTRL   | register | name=op1 offset=0x10 range=32    |
 | op2      | s_axi_CTRL   | register | name=op2 offset=0x18 range=32    |
 | op_sel   | s_axi_CTRL   | register | name=op_sel offset=0x20 range=32 |
-| seg_tens | seg_tens     | port     |                                  |
-| seg_ones | seg_ones     | port     |                                  |
+| seg      | seg          | port     |                                  |
+| an       | an           | port     |                                  |
 +----------+--------------+----------+----------------------------------+
 
 
 ================================================================
 == Bind Op Report
 ================================================================
-+--------------------------+-----+--------+----------+-----+--------+---------+
-| Name                     | DSP | Pragma | Variable | Op  | Impl   | Latency |
-+--------------------------+-----+--------+----------+-----+--------+---------+
-| + seven_segment_axi      | 1   |        |          |     |        |         |
-|   result_fu_212_p2       | -   |        | result   | add | fabric | 0       |
-|   result_1_fu_222_p2     | -   |        | result_1 | sub | fabric | 0       |
-|   mul_7ns_34ns_40_2_1_U1 | 1   |        | mul      | mul | auto   | 1       |
-+--------------------------+-----+--------+----------+-----+--------+---------+
++-------------------------+-----+--------+-------------+-----+--------+---------+
+| Name                    | DSP | Pragma | Variable    | Op  | Impl   | Latency |
++-------------------------+-----+--------+-------------+-----+--------+---------+
+| + seven_segment_axi     | 0   |        |             |     |        |         |
+|   mul_7ns_7ns_14_1_1_U2 | -   |        | result_V_2  | mul | auto   | 0       |
+|   result_V_1_fu_350_p2  | -   |        | result_V_1  | sub | fabric | 0       |
+|   result_V_fu_366_p2    | -   |        | result_V    | add | fabric | 0       |
+|   magnitude_V_fu_409_p2 | -   |        | magnitude_V | sub | fabric | 0       |
+|   add_ln186_1_fu_310_p2 | -   |        | add_ln186_1 | add | fabric | 0       |
+|   add_ln186_fu_380_p2   | -   |        | add_ln186   | add | fabric | 0       |
+|   ret_V_1_fu_556_p2     | -   |        | ret_V_1     | add | fabric | 0       |
++-------------------------+-----+--------+-------------+-----+--------+---------+
 
 
 ================================================================
@@ -113,15 +112,16 @@
 == Pragma Report
 ================================================================
 * Valid Pragma Syntax
-+-----------+-----------------------------------+------------------------------------------------------------------------+
-| Type      | Options                           | Location                                                               |
-+-----------+-----------------------------------+------------------------------------------------------------------------+
-| interface | s_axilite port=op1 bundle=CTRL    | lab2_task1_hls/seven_segment_axi.cpp:29 in seven_segment_axi, op1      |
-| interface | s_axilite port=op2 bundle=CTRL    | lab2_task1_hls/seven_segment_axi.cpp:30 in seven_segment_axi, op2      |
-| interface | s_axilite port=op_sel bundle=CTRL | lab2_task1_hls/seven_segment_axi.cpp:31 in seven_segment_axi, op_sel   |
-| interface | ap_none port=seg_tens             | lab2_task1_hls/seven_segment_axi.cpp:32 in seven_segment_axi, seg_tens |
-| interface | ap_none port=seg_ones             | lab2_task1_hls/seven_segment_axi.cpp:33 in seven_segment_axi, seg_ones |
-| interface | s_axilite port=return bundle=CTRL | lab2_task1_hls/seven_segment_axi.cpp:34 in seven_segment_axi, return   |
-+-----------+-----------------------------------+------------------------------------------------------------------------+
++-----------+-----------------------------------+----------------------------------------------------------------------+
+| Type      | Options                           | Location                                                             |
++-----------+-----------------------------------+----------------------------------------------------------------------+
+| interface | s_axilite port=op1 bundle=CTRL    | lab2_task1_hls/seven_segment_axi.cpp:50 in seven_segment_axi, op1    |
+| interface | s_axilite port=op2 bundle=CTRL    | lab2_task1_hls/seven_segment_axi.cpp:51 in seven_segment_axi, op2    |
+| interface | s_axilite port=op_sel bundle=CTRL | lab2_task1_hls/seven_segment_axi.cpp:52 in seven_segment_axi, op_sel |
+| interface | ap_none port=seg                  | lab2_task1_hls/seven_segment_axi.cpp:53 in seven_segment_axi, seg    |
+| interface | ap_none port=an                   | lab2_task1_hls/seven_segment_axi.cpp:54 in seven_segment_axi, an     |
+| interface | ap_ctrl_none port=return          | lab2_task1_hls/seven_segment_axi.cpp:55 in seven_segment_axi, return |
+| pipeline  | II=1                              | lab2_task1_hls/seven_segment_axi.cpp:58 in seven_segment_axi         |
++-----------+-----------------------------------+----------------------------------------------------------------------+
 
 
