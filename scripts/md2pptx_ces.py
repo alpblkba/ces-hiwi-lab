@@ -138,6 +138,14 @@ def parse_blocks(slide_md):
             i += 1
             continue
 
+        # A non-empty line directly under a bullet is that bullet wrapped over
+        # several source lines, not a new paragraph. Without this it would be
+        # emitted as separate un-bulleted text.
+        if stripped and bullets and line.startswith((" ", "\t")):
+            bullets[-1] += " " + strip_inline(stripped)
+            i += 1
+            continue
+
         if stripped:
             flush()
             blocks.append(("para", strip_inline(stripped)))
