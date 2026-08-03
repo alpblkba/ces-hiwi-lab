@@ -2,16 +2,15 @@
 
 This repository contains the working material for the customized embedded processors lab rewrite at the KIT Chair of Embedded Systems.
 
-The current focus is to prepare a student-facing lab structure around HLS-based accelerator design, Vitis/Vivado workflows, initial setup, bring-up, and reproducible documentation.
+The current focus is to prepare a student-facing lab structure around HLS-based accelerator design, DNN/CNN pragma exploration, Vitis/Vivado workflows, initial setup, bring-up, and reproducible documentation.
 
 ## Current scope
 
 The repository currently covers:
 
-- Lab 1.1 — initial setup and bring-up
-- Lab 1.2 — seven-segment display with HLS
-- Lab 2.1 — HLS IP integration in a block design
-- Lab 2.2 — processor-side interaction and system validation
+- Lab 1 — initial setup, bring-up, and a first HLS exercise (seven-segment display)
+- Lab 2 — HLS IP integration into a Vivado block design, with processor-side validation
+- Lab 3 — DNN kernel synthesis and pragma-based design-space exploration in Vitis HLS
 - shared setup documentation
 - troubleshooting documentation
 - development log
@@ -40,28 +39,27 @@ The lab material should be:
 ├── lab1/
 │   ├── task1/
 │   └── task2/
-└── lab2/
+├── lab2/
+│   ├── task1/
+│   └── task2/
+└── lab3/
     ├── task1/
     └── task2/
 ```
 
 ## Lab overview
 
-### Lab 1.1
+### Lab 1
 
-Initial setup and bring-up. Students learn how to access the environment, verify tools, understand the repository, and diagnose setup issues.
+Initial setup and bring-up, followed by a first small HLS exercise. Task 1 covers accessing the environment, verifying tools, and diagnosing setup issues. Task 2 has students implement a seven-segment display with HLS as an entry point into HLS thinking.
 
-### Lab 1.2
+### Lab 2
 
-Seven-segment display with HLS. Students implement a small hardware-oriented function and use it as the entry point into HLS thinking.
+Moving from isolated HLS design to system integration. Task 1 covers HLS IP integration into a Vivado block design. Task 2 connects the hardware artifact to processor-side validation, so students see and explain the full system.
 
-### Lab 2.1
+### Lab 3
 
-HLS IP integration. Students move from isolated HLS design toward system integration in Vivado.
-
-### Lab 2.2
-
-Processor-side interaction and validation. Students connect the hardware artifact to software-side validation and explain the full system.
+Pragma-based design-space exploration on a DNN kernel. Task 1 has students find, synthesize, and baseline a small DNN kernel in Vitis HLS with no optimization. Task 2 applies PIPELINE, UNROLL, and ARRAY_PARTITION — alone and combined — and has students explain what each pragma actually changes in the hardware.
 
 ## Current status
 
