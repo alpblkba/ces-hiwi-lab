@@ -1,0 +1,164 @@
+# fpgatest configuration for Lab 3 board validation
+#
+# Copy to ./fpgatest.toml on the machine the board is attached to.
+#
+# ---------------------------------------------------------------------------
+# WHAT IS BEING TESTED
+#
+# Lab 3 teaches that PIPELINE, UNROLL and ARRAY_PARTITION change how fast a
+# circuit is and how much of the device it uses. The claim that has to hold for
+# any of that to be worth teaching is: the pragmas must not change WHAT the
+# circuit computes.
+#
+# So one bitstream contains the same 4x4 dense layer -- y = ReLU(x*W + bias),
+# int8 operands, int32 accumulator -- built FIVE times with different pragmas,
+# and the `variant` register selects which one runs:
+#
+#     0  baseline, no pragmas
+#     1  PIPELINE on the neuron loop
+#     2  UNROLL the product loop
+#     3  ARRAY_PARTITION alone
+#     4  all three together
+#
+# For a given seed all five must return an identical checksum. The operands and
+# bias are generated on chip from that seed, so only one register is written.
+#
+# There is no display, no LED and no UART in this design: everything observable
+# is an AXI register. Nothing to look at on the board.
+# ---------------------------------------------------------------------------
+
+[remote]
+host    = "urelg@i80i9node1.in8.itec.kit.edu"
+project = "~/vivado/lab3_dense"
+setup   = "source /Software/xilinx/2022.2/Vivado/2022.2/settings64.sh"
+python  = "python3"
+
+[build]
+enabled          = true
+xpr              = ""
+tcl_script       = ""
+jobs             = 0
+simulation       = false
+simulation_fatal = false
+export_xsa       = ""
+poll_s           = 3
+
+[log]
+dir  = "~/.fpgatest/logs"
+keep = 50
+
+[cable]
+url          = "ftdi://ftdi:2232h/1"
+frequency_hz = 10_000_000
+vector_bytes = 2048
+
+[uart]
+enabled = false
+
+[hw]
+# From the Vivado address editor. Confirm against the build log line:
+#   ADDR_SEG: .../SEG_dense_axi_0_Reg -> 0x40000000
+base = "0x40000000"
+
+[run]
+mode      = "bit"
+settle_ms = 1500
+timeout_s = 900
+
+# ---------------------------------------------------------------------------
+# Register map, from the generated xdense_axi_hw.h:
+#
+#   0x00  ap_ctrl   bit0 ap_start (write 1 to run)
+#   0x10  seed      32-bit, read/write
+#   0x18  variant   0..4, selects which pragma build runs
+#   0x20  checksum  32-bit, read only
+#
+# Worst-case latency is 68 cycles (~0.7 us at 100 MHz), so 5 ms is enormous
+# margin. The block latches the checksum, so no polling is needed.
+#
+# Expected values come from a plain-C golden model and were confirmed in C
+# simulation for all five variants before the bitstream was built.
+# ---------------------------------------------------------------------------
+
+# --- is the peripheral reachable and clocked? -------------------------------
+# seed is a plain read/write register. Writing and reading it back exercises
+# the AXI path and the block's clock without involving the dense layer. If
+# this fails, every checksum below is meaningless and the cause is upstream:
+# no FCLK (ps_init failed), wrong [hw].base, or the CPU's MMU translating the
+# address away.
+
+[[test]]
+name = "AXI alive: seed register reads back what was written"
+ops = [
+  { write = 0x10, value = 0x12345678 },
+  { read  = 0x10, expect = 0x12345678 },
+]
+
+# --- functional equivalence: the point of the lab ---------------------------
+# Same seed through all five pragma builds. Identical checksum required.
+
+[[test]]
+name = "seed 1, variant 0 (baseline)"
+ops = [ { write = 0x10, value = 1 }, { write = 0x18, value = 0 },
+        { write = 0x00, value = 1 }, { delay_ms = 5 },
+        { read = 0x20, expect = 0x00006328 } ]
+
+[[test]]
+name = "seed 1, variant 1 (PIPELINE) -- must match baseline"
+ops = [ { write = 0x10, value = 1 }, { write = 0x18, value = 1 },
+        { write = 0x00, value = 1 }, { delay_ms = 5 },
+        { read = 0x20, expect = 0x00006328 } ]
+
+[[test]]
+name = "seed 1, variant 2 (UNROLL) -- must match baseline"
+ops = [ { write = 0x10, value = 1 }, { write = 0x18, value = 2 },
+        { write = 0x00, value = 1 }, { delay_ms = 5 },
+        { read = 0x20, expect = 0x00006328 } ]
+
+[[test]]
+name = "seed 1, variant 3 (ARRAY_PARTITION alone) -- must match baseline"
+ops = [ { write = 0x10, value = 1 }, { write = 0x18, value = 3 },
+        { write = 0x00, value = 1 }, { delay_ms = 5 },
+        { read = 0x20, expect = 0x00006328 } ]
+
+[[test]]
+name = "seed 1, variant 4 (all three) -- must match baseline"
+ops = [ { write = 0x10, value = 1 }, { write = 0x18, value = 4 },
+        { write = 0x00, value = 1 }, { delay_ms = 5 },
+        { read = 0x20, expect = 0x00006328 } ]
+
+# --- a second seed, so a latched-once block cannot pass ---------------------
+
+[[test]]
+name = "seed 42, variant 0 (baseline)"
+ops = [ { write = 0x10, value = 42 }, { write = 0x18, value = 0 },
+        { write = 0x00, value = 1 }, { delay_ms = 5 },
+        { read = 0x20, expect = 0x00050AB8 } ]
+
+[[test]]
+name = "seed 42, variant 4 (all three) -- must match baseline"
+ops = [ { write = 0x10, value = 42 }, { write = 0x18, value = 4 },
+        { write = 0x00, value = 1 }, { delay_ms = 5 },
+        { read = 0x20, expect = 0x00050AB8 } ]
+
+# --- ReLU and bias are exercised: seed 1000 clamps several outputs ----------
+
+[[test]]
+name = "seed 1000, variant 0 (baseline)"
+ops = [ { write = 0x10, value = 1000 }, { write = 0x18, value = 0 },
+        { write = 0x00, value = 1 }, { delay_ms = 5 },
+        { read = 0x20, expect = 0x00003E6B } ]
+
+[[test]]
+name = "seed 1000, variant 4 (all three) -- must match baseline"
+ops = [ { write = 0x10, value = 1000 }, { write = 0x18, value = 4 },
+        { write = 0x00, value = 1 }, { delay_ms = 5 },
+        { read = 0x20, expect = 0x00003E6B } ]
+
+# --- result really is recomputed, not a stale register ----------------------
+
+[[test]]
+name = "seed 7 after seed 1000: result changes"
+ops = [ { write = 0x10, value = 7 }, { write = 0x18, value = 0 },
+        { write = 0x00, value = 1 }, { delay_ms = 5 },
+        { read = 0x20, expect = 0x0000CC88 } ]

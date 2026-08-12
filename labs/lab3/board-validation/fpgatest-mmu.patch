@@ -1,0 +1,51 @@
+Fix: reset the A9 before ps7_init so a stale MMU cannot block register access
+
+Symptom, on every step that touches memory:
+
+    [fail] step ps_init  Memory read error at 0xF8007080. MMU section translation fault
+    [fail] step write 0x40000010  Memory write error ... MMU section translation fault
+
+xsdb reaches memory through the selected A9 core context, so accesses go
+through that core's MMU. Out of reset the A9 has SCTLR.M clear and addressing
+is physical, which is what the whole flow assumes. But SCTLR.M survives `stop`:
+if anything ran on the core beforehand -- an ELF from an earlier session, or a
+bootloader when the board is not strapped for JTAG boot -- the MMU is still
+enabled and every physical address is translated through page tables that do
+not describe 0xF8000000 or the PL AXI window. Halting the core does not undo
+that.
+
+The existing comment explains why `rst -system` is avoided here, and that
+reasoning stands: it drops the DAP and xsdb's reconnect timeout is shorter than
+a JTAG round trip over the tunnel. `rst -processor` is narrower. It resets the
+A9 core only, leaving the DAP and the JTAG chain untouched, which is enough to
+clear SCTLR.M.
+
+Without this the only recovery is a manual power cycle before every run, and
+the failure mode is opaque: the bitstream programs fine and then every register
+access fails for reasons that have nothing to do with the design under test.
+
+--- a/remote_agent.py
++++ b/remote_agent.py
+@@ select_cpu / stop_cpu sequence
+         a("""if {![ft_step select_cpu {targets -set -nocase -filter {name =~ "*A9*#0"}}]} {
+     ft step ps_contexts fail {APU is present but no Cortex-A9 core context: the DAP is only half awake. Power-cycle the board and run again.}
+     ft done - - -
+     exit 6
+ }""")
++        # Memory access below goes through this core's MMU. SCTLR.M survives a
++        # `stop`, so anything that ran earlier -- a previous ELF, or a
++        # bootloader if the board is not strapped for JTAG boot -- leaves
++        # translation enabled and every physical address faults. Resetting the
++        # core clears it. Unlike `rst -system` this leaves the DAP alone, so it
++        # is safe over XVC. Failure is not fatal: on a core that was already
++        # clean the run continues unaffected.
++        a('ft_step cpu_reset {if {[catch {rst -processor} e]} '
++          '{ ft info cpu_reset "rst -processor unavailable: $e" }}')
+         # JP2 = JTAG boot means the BootROM leaves the A9 running with no FSBL.
+         # ps7_init writes the PS configuration registers through the DAP, and
+         # the DAP refuses register and memory access on a running core, so the
+         # CPU has to be halted first -- this is the `stop` that Vitis' own
+         # debug launcher issues at exactly this point.
+         # Already-halted is the normal case in JTAG boot, not a failure.
+         a('ft_step stop_cpu {if {[catch {stop} e] '
+           '&& ![string match "*Already stopped*" $e]} { error $e }}')

@@ -1,0 +1,36 @@
+Fix: XSA extraction byproducts must not count as stale sources
+
+`loadhw -hw <project>/x.xsa` makes xsdb unpack the XSA next to itself, which
+drops a drivers/ tree and ps7_init.* into the Vivado project directory with a
+fresh mtime on every run.
+
+The staleness scan then sees those files as design sources newer than the
+bitstream, so the next run reports "N source file(s) newer than the bitstream"
+and refuses to program. Building cannot clear it: synth and impl really are up
+to date, so the impl .bit keeps its old timestamp and the condition is
+permanent. In other words a successful run makes the following run impossible.
+
+Observed with a Zynq-7000 HLS design: 6 files under drivers/ plus 5 ps7_init.*
+files, all extracted by loadhw, reported as 11 stale sources for ever after.
+
+--- a/remote_agent.py
++++ b/remote_agent.py
+@@
+ SKIP_DIRS = re.compile(
+-    r"(^|/)(\.git|\.Xil|\.jobs|ip_user_files|sim_\w+|\.metadata|_ide)(/|$)"
++    r"(^|/)(\.git|\.Xil|\.jobs|ip_user_files|sim_\w+|\.metadata|_ide|drivers)(/|$)"
+ )
+
++# `loadhw` unpacks the XSA next to it, so ps7_init.* and a drivers/ tree land
++# in the project directory every time a run happens. They are extraction
++# byproducts of the tool's own flow, never design sources, and treating them as
++# sources makes each run invalidate the next one.
++SKIP_FILES = re.compile(r"(^|/)(ps7_init|psu_init)(_gpl)?\.(c|h|tcl|html)$")
++
+
+@@ staleness scan
+     for pattern in SOURCE_GLOBS:
+         for path in rglob(project, pattern):
+-            if SKIP_DIRS.search(path):
++            if SKIP_DIRS.search(path) or SKIP_FILES.search(path):
+                 continue
