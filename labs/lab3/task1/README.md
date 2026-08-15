@@ -1,107 +1,73 @@
 # Lab 3.1 — The unoptimised baseline
 
-## Objective
+One dense (fully connected) neural-network layer:
 
-Synthesize a small dense neural-network layer with **no optimisation pragmas**
-and record what the tool produces: latency, initiation interval, and resource
-use. This is the reference every variant in Task 3.2 is measured against.
-
-There is nothing to make fast in this task. The goal is a trustworthy starting
-point and the ability to read the synthesis report.
-
-## The kernel
-
-A dense (fully connected) layer is a matrix multiply. For `N = 16`:
-
-```cpp
-void matmul(const data_t A[N][N], const data_t B[N][N], acc_t C[N][N]) {
-row:
-    for (int i = 0; i < N; i++) {
-    col:
-        for (int j = 0; j < N; j++) {
-            acc_t acc = 0;
-        prod:
-            for (int k = 0; k < N; k++) {
-                acc += (acc_t)A[i][k] * (acc_t)B[k][j];
-            }
-            C[i][j] = acc;
-        }
-    }
-}
+```
+y = ReLU(x·W + bias)
 ```
 
-That is 16 × 16 × 16 = **4096 multiply-accumulate operations**. The loops are
-labelled `row`, `col` and `prod` so that Task 3.2 can attach a pragma to one
-specific loop. Labels do not affect the hardware.
-
-## Two decisions made before you start, and why
-
-**The size is a compile-time constant.** If `N` were a function argument, Vitis
-HLS could not know the trip count and would report the latency as `?`. Since the
-entire point of Lab 3 is comparing latency between variants, the bound has to be
-known at compile time.
-
-**The operands are 8-bit, with a 32-bit accumulator.** This mirrors quantised
-DNN practice, but on this board it is closer to a requirement than a choice. A
-32-bit multiply costs about four DSP slices, and the device has 66:
-
-| kernel data type | DSP used at baseline | share of device |
-|------------------|---------------------|-----------------|
-| `int` (32-bit) | 42 | 63 % |
-| `ap_int<8>` operands, `ap_int<32>` accumulator | 8 | 12 % |
-
-Both give **identical latency**, because the data type does not change how many
-operations there are. It only changes what each one costs. Starting from the
-32-bit version would leave no DSP budget to explore anything in Task 3.2.
+4×4, 8-bit operands, 32-bit accumulator. Sizes are compile-time constants, so
+Vitis HLS can report a latency number instead of `?`.
 
 ## Files
 
-| File | Purpose |
-|------|---------|
-| `src/matmul.h` | sizes and data types |
-| `src/matmul.cpp` | the kernel, no optimisation pragmas |
-| `src/matmul_tb.cpp` | testbench with an independent golden model |
+```
+src/dnn_task1.h      sizes and types
+src/dnn_task1.cpp    the layer, no optimisation pragmas
+src/dnn_task1_tb.cpp testbench with an independent golden model
+```
 
-The testbench computes the same product in plain `int` C, with no HLS types, and
-compares element by element. Inputs are deterministic pseudo-random values over
-the full signed 8-bit range, so sign handling is exercised and any failure is
-reproducible.
+The three loops are labelled `sample`, `neuron` and `prod`. Task 2 attaches
+pragmas to those labels. Labels do not affect the hardware.
 
-## Workflow
+## Build
 
-1. Create a Vitis HLS project with `matmul` as the top function.
-2. Part `xc7z007sclg400-1`, clock period **10 ns**.
-3. Run **C simulation** — it must pass before any synthesis figure is meaningful.
-4. Run **C synthesis**.
-5. Record from the report: latency, interval, BRAM, DSP, FF, LUT.
+```bash
+source /Software/xilinx/2022.2/Vitis_HLS/2022.2/settings64.sh
+cd labs/lab3/task1/hls
+vitis_hls -f run_hls.tcl        # part xc7z007sclg400-1, 10 ns clock
+```
 
-See `commands.md` for the exact commands.
+C simulation must pass before any synthesis number means anything.
 
-## Reading the report
+## The testbench
 
-Four numbers matter, and they are the same four you will compare in Task 3.2:
+It checks behaviour, not synthesis, and it is worth reading before it is worth
+running. Twelve cases, each aimed at something that actually breaks: the ReLU
+boundary, the sign of an 8-bit operand, the width of the accumulator, whether
+the two matrix indices got swapped, and whether one sample can see another's
+data. A random input finds none of these reliably, which is why `random` is the
+last case in the list rather than the only one.
 
-| Figure | Meaning |
-|--------|---------|
-| **Latency** | cycles from start to finish for one complete call |
-| **Interval (II)** | cycles before the next call can start |
-| **DSP** | hardware multipliers used — the scarce resource here |
-| **LUT / FF / BRAM** | logic, registers, and memory |
+Build it with an ordinary compiler first — it is the same code, and the errors
+are far easier to read than the tool's:
 
-Also look at the **Loop** section further down the report. It lists each labelled
-loop with its own trip count, latency and interval. That table is where the
-effect of a pragma becomes visible, well before the totals change.
+```bash
+g++ -O2 -std=c++11 -I $XILINX_HLS/include \
+    ../src/dnn_task1.cpp ../src/dnn_task1_tb.cpp -o dnn_test
+./dnn_test              # every case
+./dnn_test list         # what the cases are
+./dnn_test relu-edge index-order
+./dnn_test random 42
+```
 
-## Expected result
+The same words go through `csim_design -argv {relu-edge}` inside the tool.
 
-- C simulation passes.
-- A synthesis report with a determinate latency (a number, not `?`).
-- Baseline figures recorded and ready to compare against.
+## Baseline, after place and route
 
-## Deliverables
+```
+LUT      323 / 14400    2.24%
+FF       313 / 28800    1.09%
+BRAM       0 / 50       0.00%
+DSP       16 / 66      24.24%
+latency   11 cycles  (0.110 us)
+```
 
-- The three source files.
-- The baseline synthesis report.
-- A short answer to: *the kernel performs 4096 multiply-accumulate operations,
-  yet the design uses only a handful of DSP slices. Where do the other
-  multiplications happen?*
+These are the numbers every variant in Task 2 is compared against.
+
+## Note on the data type
+
+8-bit operands are not an arbitrary choice. A 32-bit multiply costs about four
+DSP slices and this device has 66, so an `int` version of the same layer leaves
+almost no room to explore anything in Task 2. Quantised inference works the same
+way in practice.

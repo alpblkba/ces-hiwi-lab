@@ -1,146 +1,271 @@
 # Lab 3.2 — Pragma design space exploration
 
-## Objective
+Same layer as Task 1. Only pragmas are added; the arithmetic is untouched.
 
-Take the Task 3.1 kernel — unchanged — and apply `PIPELINE`, `UNROLL` and
-`ARRAY_PARTITION`, first one at a time and then in combination. For each
-variant, record latency, initiation interval and resource use, and explain
-**why** the numbers moved.
+Three pragmas, applied alone and then together:
 
-The deliverable is the table and the reasoning, not a single fastest
-configuration.
-
-## Before you measure anything: the tool is already optimising
-
-Vitis HLS applies optimisations even when the source contains no pragmas at all.
-Synthesizing the Task 3.1 kernel with default settings produces this in the log:
-
-```text
-INFO: [XFORM 203-510] Pipelining loop 'col' ... automatically.
-INFO: [HLS 200-489] Unrolling loop 'prod' ... completely with a factor of 16.
+```cpp
+#pragma HLS PIPELINE II=1          // on the neuron loop
+#pragma HLS UNROLL                 // on the prod loop
+#pragma HLS ARRAY_PARTITION ...    // on x (dim 2) and W (dim 1)
 ```
 
-The effect is large:
+All five variants come from **one** source file. `src/dnn_task2.cpp` guards
+each pragma with `#if VARIANT == n`, and `hls/run_hls.tcl` builds every variant
+by passing `-DVARIANT=n`:
 
-| baseline | latency | DSP | LUT |
-|----------|---------|-----|-----|
-| tool defaults, no pragmas | 2 057 | 8 | 1 264 |
-| automatic pipelining disabled | **21 025** | 1 | 198 |
-
-The tool gives a **10× speedup for free**. If you measure your pragmas against
-the 2 057 figure you will conclude that they do nothing, or that they make the
-design worse — because you would not be adding optimisation, you would be
-overriding the tool's own and usually doing a worse job of it.
-
-Every number below therefore uses:
-
-```tcl
-config_compile -pipeline_loops 0
+```bash
+cd labs/lab3/task2/hls
+vitis_hls -f run_hls.tcl            # all five
+vitis_hls -f run_hls.tcl -tclargs 2 # only variant 2
+python3 summarise.py                # reports -> results.md
 ```
 
-so that each pragma's own contribution is visible. This is the single most
-important methodological point in the lab.
+Editing the pragmas by hand works just as well, and doing two or three that way
+before running the sweep is the part where the learning happens. The macro
+exists so that five builds do not need five copies of the same arithmetic — and
+so the claim "only the pragmas changed" is literally true.
+
+| variant | pragmas |
+|---------|---------|
+| 0 | none — identical to Task 3.1 |
+| 1 | `PIPELINE II=1` on `neuron` |
+| 2 | `UNROLL` on `prod` |
+| 3 | `ARRAY_PARTITION` on `x` and `W` |
+| 4 | all three |
 
 ## Results
 
-All figures are real Vitis HLS 2022.2 C-synthesis output, `xc7z007sclg400-1`,
-10 ns clock, 16×16 int8 matmul. Speed-up is relative to the 21 025-cycle
-baseline.
+Measured on hardware, `xc7z007sclg400-1` at 100 MHz. Resource figures come from
+the post-place-and-route hierarchical report, not from the C-synthesis estimate.
+Latency is the HLS figure — the fabric has no cycle counter.
 
-| # | configuration | latency | speed-up | DSP | FF | LUT |
-|---|---------------|---------|----------|-----|----|-----|
-| V00 | baseline, no pragmas | 21 025 | 1.0× | 1 | 75 | 198 |
-| V01 | `PIPELINE` on `prod` | 6 401 | 3.3× | 1 | 145 | 285 |
-| V02 | `PIPELINE` on `col` | 2 057 | 10.2× | 8 | 373 | 1 260 |
-| V03 | `UNROLL 2`, no partition | 10 785 | 1.9× | 1 | 99 | 288 |
-| V04 | `UNROLL 4`, no partition | 5 665 | 3.7× | 2 | 131 | 405 |
-| V05 | `UNROLL 8`, no partition | 4 641 | 4.5× | 4 | 171 | 645 |
-| V06 | `UNROLL 16`, no partition | 3 233 | 6.5× | 8 | 688 | 1 104 |
-| V07 | `ARRAY_PARTITION 4` only | **21 025** | **1.0×** | 1 | 81 | 222 |
-| V08 | `UNROLL 2` + `PARTITION 2` | 10 785 | 1.9× | 1 | 95 | 240 |
-| V09 | `UNROLL 4` + `PARTITION 4` | 5 665 | 3.7× | 2 | 111 | 306 |
-| V10 | `UNROLL 8` + `PARTITION 8` | 3 617 | 5.8× | 4 | 158 | 443 |
-| V11 | `UNROLL 16` + `PARTITION complete` | 1 585 | 13.3× | 8 | 463 | 639 |
-| V12 | `PIPELINE col` + `UNROLL 4` + `PARTITION 4` | **518** | **40.6×** | 8 | 331 | 1 037 |
+**baseline**
+```
+LUT      323 / 14400    2.24%
+FF       313 / 28800    1.09%
+BRAM       0 / 50       0.00%
+DSP       16 / 66      24.24%
+latency   11 cycles
+```
 
-## What each pragma actually did
+**PIPELINE**
+```
+LUT      104 / 14400    0.72%
+FF        99 / 28800    0.34%
+BRAM       0 / 50       0.00%
+DSP        4 / 66       6.06%
+latency   21 cycles
+```
 
-**`ARRAY_PARTITION` on its own does nothing.** V07 is 21 025 cycles — identical
-to the baseline, to the cycle. Splitting a memory into several smaller memories
-only helps if something is trying to read them at the same time. Nothing in the
-baseline is, so the extra ports sit unused. This is the cleanest single result
-in the lab: a pragma that changes the hardware and changes the performance not
-at all.
+**UNROLL**
+```
+LUT      321 / 14400    2.23%
+FF       313 / 28800    1.09%
+BRAM       0 / 50       0.00%
+DSP       16 / 66      24.24%
+latency   11 cycles
+```
 
-**`PIPELINE` is the strongest single pragma, and where you put it matters.**
-On the innermost loop (V01) it gives 3.3×. On the `col` loop one level up (V02)
-it gives 10.2×, because pipelining a loop forces everything inside it to unroll,
-so the whole inner product is built as parallel hardware. Same pragma, one line
-higher, five times the effect.
+**ARRAY_PARTITION alone**
+```
+LUT      384 / 14400    2.67%
+FF       313 / 28800    1.09%
+BRAM       0 / 50       0.00%
+DSP       16 / 66      24.24%
+latency   11 cycles
+```
 
-**`UNROLL` scales, but sub-linearly.** Doubling the factor does not halve the
-latency: 1.9× → 3.7× → 4.5× → 6.5× for factors 2, 4, 8, 16. Sixteen times the
-arithmetic buys 6.5× the speed. The gap is the cost of getting operands in and
-out.
+**all three**
+```
+LUT      104 / 14400    0.72%
+FF        99 / 28800    0.34%
+BRAM       0 / 50       0.00%
+DSP        4 / 66       6.06%
+latency   21 cycles
+```
 
-**`UNROLL` + `ARRAY_PARTITION` only pays off at high factors.** This is more
-subtle than the usual "always partition what you unroll" advice, and the data
-says so plainly:
+## What the numbers say
 
-| factor | unroll alone | unroll + partition | gain |
-|--------|--------------|--------------------|------|
-| 2 | 10 785 | 10 785 | none |
-| 4 | 5 665 | 5 665 | none |
-| 8 | 4 641 | 3 617 | 1.28× |
-| 16 | 3 233 | 1 585 | 2.04× |
+**ARRAY_PARTITION on its own costs area and buys nothing.** 384 LUT against the
+baseline's 323, same latency, same DSP count. Splitting a memory only helps if
+something reads it concurrently, and nothing here does. This is the most useful
+result in the lab: a pragma can change the generated hardware and change the
+performance not at all.
 
-At factors 2 and 4 the partition changes nothing at all — it only trims a few
-LUTs. A block RAM already has two ports, and the scheduler can spread a small
-number of accesses across cycles. Only once the unrolled loop demands more
-concurrent reads than the memory can deliver does partitioning start to pay,
-and by factor 16 it is worth a clean 2×.
+At this size partitioning never pays, in any combination. It starts to matter
+once the unrolled loop asks for more concurrent accesses than the memory can
+supply. See `hls/archive-16x16/` for the 16×16 measurements, where partitioning is
+worth 1.28× at unroll 8 and 2.04× at full unroll.
 
-**The combination beats any single pragma by a wide margin.** V12 combines a
-pipelined `col` loop with a partially unrolled and matched-partition inner loop:
-518 cycles, 40.6× the baseline, using 12 % of the DSPs and 7 % of the LUTs.
+**UNROLL changes almost nothing** — 321 LUT against 323, identical latency.
+The loop is four iterations long and Vitis HLS already unrolls it without being
+asked.
 
-## The resource cliff
+**PIPELINE is the only pragma that moves anything, and it trades the opposite
+way from what students expect.** Latency goes up (11 → 21 cycles) while
+resources drop by roughly 4× (16 → 4 DSP). Pipelining lets the tool reuse one
+multiply-accumulate across cycles instead of building four in parallel. Faster
+throughput, more cycles per call, much smaller circuit.
 
-The cliff does not appear in the table above, because with automatic pipelining
-disabled nothing exceeded 8 DSP. It appears when a full unroll is combined with
-the tool's automatic pipelining:
+**All three together is identical to PIPELINE alone.** The other two pragmas
+contribute nothing on top.
 
-| configuration | latency | DSP | fits on `xc7z007s`? |
-|---------------|---------|-----|---------------------|
-| V11 with auto-pipelining left on | 143 | **128** | **no** — 194 % of the 66 available |
-| V06 with auto-pipelining left on | 269 | **128** | **no** |
-| V12 (recommended) | 518 | 8 | yes, 12 % |
+---
 
-The fastest result the tool will happily report is not implementable on this
-board. Vitis HLS does not stop you: C synthesis reports an estimate, and the
-design only fails later, in Vivado. Checking the estimate against the device
-budget is part of reading the report.
+# On the board
 
-Note also that 143 cycles versus 518 is a 3.6× gain bought with 16× the DSPs, on
-a device that does not have them. That is the shape of a bad trade.
+Everything above is an estimate from a synthesis report. This half puts each
+variant on the board and lets the hardware answer instead.
 
-## What to hand in
+The claim being tested is the one this task rests on:
 
-- The results table, with your own numbers.
-- For each pragma, one or two sentences on what changed in the hardware.
-- An answer to: *`ARRAY_PARTITION` on its own produced exactly the baseline
-  latency. Was the pragma ignored? If not, what did it change?*
-- An answer to: *which configuration would you actually put on the board, and
-  why is it not the fastest one?*
+> `PIPELINE`, `UNROLL` and `ARRAY_PARTITION` change how fast a circuit is and
+> how much of the device it uses. They must not change **what** it computes.
 
-## Reproducing
+## Five bitstreams, not five registers
 
-`src/sweep.py` generates every variant, synthesizes it, and writes the table.
-See `commands.md`. Doing two or three variants by hand first is worthwhile — the
-script is for the sweep, not for learning where the pragmas go.
+Each pragma variant is built as its **own** bitstream. Program one, run the
+application, type a seed, note the checksum. Program the next, run the same
+application unchanged, type the same seed. The checksum must not move.
 
-## Optional extensions
+This is deliberately more work than putting all five in one bitstream behind a
+`variant` register, and it is worth it for two reasons:
 
-- `DATAFLOW` to overlap operand loading with computation.
-- `ap_fixed` instead of integers, and what that costs.
-- Push `N` to 32 and find where the device runs out.
+- **The demonstration cannot be argued with.** One bitstream with a selector is
+  one circuit behind a multiplexer. Five bitstreams are five physically
+  different circuits.
+- **The DSP budget comes back.** All five together used 56 of the 66 DSP
+  slices, which left no room to push an unroll factor and find the resource
+  cliff. Alone, each variant uses between 4 and 16.
+
+The application reads a `variant_id` register the kernel reports from its own
+compile-time constant, so it always names the bitstream that is actually
+loaded rather than the one you meant to load.
+
+## What the software does
+
+```text
+you type a seed at the terminal
+        │
+        ▼
+C program on the ARM core
+        │  writes seed, sets ap_start, polls ap_done, reads checksum
+        ▼
+AXI4-Lite registers
+        │
+        ▼
+DNN kernel in the PL          y = ReLU(x·W + bias), 4×4, int8 in, int32 acc
+```
+
+and then — this is the part that matters — **the same program computes the
+answer itself in plain C on the ARM and compares**. The golden model runs on
+the board. There is no host tool in the loop, nothing to trust except the
+terminal.
+
+The operands are generated on chip from the seed, so only one register has to
+be written. `dnn_app.c` reproduces that generator exactly; the two are a
+contract, and both files say so.
+
+## Menu
+
+| | |
+|---|---|
+| 1 | self-test — the four reference seeds, hardware vs on-board model vs recorded history |
+| 2 | run one seed you choose |
+| 3 | show the operands and the expected output, then check the hardware against them |
+| 4 | timing — measured cycles per layer evaluation |
+| 5 | AXI alive check |
+
+The self-test prints three columns, and all three have to agree. The hardware
+column against the on-board model catches a broken circuit. Both of them
+against the recorded column catches a *changed* golden model — the failure
+mode where the software and the hardware drift together and agree on the wrong
+answer.
+
+| seed | checksum |
+|------|----------|
+| 1 | `0x00006328` |
+| 42 | `0x00050AB8` |
+| 1000 | `0x00003E6B` |
+| 7 | `0x0000CC88` |
+
+The four differ from each other, so a block that latched one answer and returns
+it for ever cannot pass. Seed 1000 clamps several outputs, so ReLU and the bias
+are exercised rather than being dead code.
+
+## Timing
+
+The fabric has no cycle counter, so the ARM's global timer measures instead.
+The kernel takes a `reps` register and runs the layer that many times per call,
+which pushes the AXI handshake down into the noise; with `reps` large the
+figure converges on the loop latency.
+
+This is what turns "pipelining raises latency from 11 to 21 cycles while
+shrinking the circuit four-fold" from a line in a report into a number the
+student watches change when they load a different bitstream.
+
+## Files
+
+| File | Purpose |
+|------|---------|
+| `src/dnn_kernel_axi.h` / `.cpp` | the AXI4-Lite wrapper, one variant per build |
+| `src/dnn_kernel_axi_tb.cpp` | C simulation: checksums, `reps` behaviour, `variant_id` |
+| `src/dnn_app.c` | the ARM application |
+| `hls/run_hls_axi.tcl` | exports one AXI IP per variant |
+
+## Workflow
+
+```bash
+# 1. five IPs
+cd labs/lab3/task2/hls && vitis_hls -f run_hls.tcl
+
+# 2. five bitstreams
+for v in 0 1 2 3 4; do
+    vivado -mode batch -source scripts/build_lab3_vivado.tcl -tclargs $v
+done
+
+# 3. one workspace, from the XSA of the variant you want to run first
+xsct scripts/create_vitis_workspace.tcl \
+     ~/vivado/lab3_dnn_bits/v0/dnn_system_wrapper_v0.xsa \
+     labs/lab3/task2/src ~/vitis/lab3_ws dnn_app
+
+# 4. program and run
+xsct scripts/debug_init.tcl <bit> <ps7_init.tcl> ~/vitis/lab3_ws/dnn_app/Debug/dnn_app.elf
+```
+
+Step 3 is worth doing on the machine the board is attached to. The XSA travels
+between machines; a Vitis workspace does not — it records the platform by
+absolute path, and a copied one reports "Binary File not Found" while the ELF
+is sitting exactly where it should be.
+
+## Register map
+
+Confirm against the generated `xdnn_kernel_axi_hw.h`. Vitis HLS assigns these
+offsets from the argument order, so adding or reordering an argument moves
+them — and a stale copy of this table is a genuinely expensive mistake.
+
+| offset | register | |
+|--------|----------|---|
+| `0x00` | `ap_ctrl` | bit 0 `ap_start` (W), bit 1 `ap_done` (R, clear-on-read), bit 2 `ap_idle` |
+| `0x10` | `seed` | 32-bit R/W |
+| `0x18` | `reps` | 32-bit R/W |
+| `0x20` | `checksum` | 32-bit R |
+| `0x28` | `variant_id` | 32-bit R |
+
+## Deliverables
+
+- The self-test output for all five bitstreams, showing identical checksums.
+- The post-implementation utilisation for each variant — **not** the
+  C-synthesis estimate. On this kernel the estimate was out by roughly 2× on
+  DSP and 3× on LUT, in opposite directions.
+- The measured cycles per evaluation for at least the baseline and the
+  pipelined variant, and one or two sentences on why the faster-throughput one
+  has the higher latency.
+
+## Instructor notes
+
+`../board-validation/` holds the fpgatest configuration and two patches that
+fix real bring-up failures found on this design (a stale MMU blocking register
+access, and XSA extraction byproducts being counted as stale sources). That
+harness is for validation, not for students.

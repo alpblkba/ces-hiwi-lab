@@ -21,17 +21,23 @@ The lab is about learning to read that trade-off from the synthesis report.
 | **3.1** | Synthesize the kernel with no optimisation pragmas. Establish the baseline latency and resource cost. |
 | **3.2** | Apply `PIPELINE`, `UNROLL` and `ARRAY_PARTITION` — first alone, then combined — and explain what each one did and why. |
 
-Both tasks use **the same kernel**. Nothing changes between them except the
-pragmas, so every number is directly comparable to the Task 3.1 baseline.
+Both tasks use **the same kernel**. Nothing changes between them except
+the pragmas, so every number is directly comparable to the Task 3.1 baseline.
 
 ## Target
 
 - Board: **Blackboard, Zynq-7000 `xc7z007sclg400-1`** (same as Labs 1 and 2)
 - Clock: **10 ns (100 MHz)**
-- Flow: **Vitis HLS C synthesis only** — no Vivado implementation, no bitstream
+- Flow: Vitis HLS C synthesis, then Vivado implementation and one bitstream per
+  pragma variant for the board half of Task 3.2
 
-Only C synthesis is needed. The question this lab asks is how pragmas change the
-generated architecture, and the synthesis report answers that directly.
+Task 3.1 stops at C synthesis, because the question there is how the
+pragmas change the generated architecture and the synthesis report answers that
+directly. The board half of Task 3.2 exists because the synthesis report is an **estimate**: on
+this kernel it was out by roughly 2× on DSP and 3× on LUT against the
+post-place-and-route figures, in opposite directions. Any claim about what fits
+on the device has to come from implementation, and any claim about what the
+circuit computes has to come from the board.
 
 ## The device budget, and why it dominates this lab
 
@@ -72,13 +78,15 @@ labs/lab3/
 ├── task1/
 │   ├── README.md      baseline task
 │   ├── commands.md    reproducible commands
-│   ├── src/           kernel + testbench
-│   └── hls/           synthesis reports
-└── task2/
-    ├── README.md      pragma exploration
-    ├── commands.md    reproducible commands
-    ├── src/           sweep script
-    └── hls/           per-variant reports
+│   ├── src/           dnn_task1.{h,cpp} + testbench
+│   └── hls/           run_hls.tcl, synthesis report
+├── task2/
+│   ├── README.md      pragma exploration
+│   ├── commands.md    reproducible commands
+│   ├── src/           dnn_task2.{h,cpp} + testbench, the AXI wrapper and dnn_app.c
+│   └── hls/           run_hls.tcl, run_hls_axi.tcl, summarise.py, reports
+│       └── archive-16x16/   superseded 16x16 matmul measurements
+└── board-validation/  instructor-only fpgatest harness, not student material
 ```
 
 ## Optional extensions

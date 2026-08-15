@@ -2,6 +2,11 @@
 #
 # Copy to ./fpgatest.toml on the machine the board is attached to.
 #
+# NOTE: this describes the SUPERSEDED 5-in-1 design, kept as a working fallback
+# at ~/archive/lab3-5in1-known-good/ until the task2 board flow is verified on the
+# board. The lab now builds one bitstream per pragma variant and checks itself
+# from an application on the ARM core - see labs/lab3/task2/README.md.
+#
 # ---------------------------------------------------------------------------
 # WHAT IS BEING TESTED
 #
@@ -29,7 +34,7 @@
 
 [remote]
 host    = "urelg@i80i9node1.in8.itec.kit.edu"
-project = "~/vivado/lab3_dense"
+project = "~/vivado/lab3_dnn"
 setup   = "source /Software/xilinx/2022.2/Vivado/2022.2/settings64.sh"
 python  = "python3"
 
