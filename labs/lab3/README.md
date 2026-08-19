@@ -74,7 +74,8 @@ device.
 labs/lab3/
 ├── README.md          this file
 ├── docs/              slides
-├── setup/             shared setup notes
+├── setup/
+│   └── board-bringup-mop.md   step-by-step procedure, HLS to a running board
 ├── task1/
 │   ├── README.md      baseline task
 │   ├── commands.md    reproducible commands
@@ -88,6 +89,9 @@ labs/lab3/
 │       └── archive-16x16/   superseded 16x16 matmul measurements
 └── board-validation/  instructor-only fpgatest harness, not student material
 ```
+
+The full procedure, with troubleshooting keyed to the actual error messages,
+is in [`setup/board-bringup-mop.md`](setup/board-bringup-mop.md).
 
 ## Optional extensions
 

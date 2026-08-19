@@ -68,6 +68,21 @@ apply_bd_automation -rule xilinx.com:bd_rule:processing_system7 \
              Master "Disable" Slave "Disable"} $ps
 set_property CONFIG.PCW_FPGA_FCLK0_ENABLE {1} $ps
 
+# The application is entirely interactive: it reads a seed with scanf and prints
+# results. Without a PS UART, printf has nowhere to go and scanf blocks for ever
+# on a port that does not exist. Neither is an error message - the board simply
+# sits there, which is a miserable thing to debug.
+#
+# MIO 48/49 is where Zynq boards conventionally route UART1 to the USB-UART
+# bridge. CONFIRM against the Blackboard's own documentation or master XDC
+# before trusting it; if the board uses UART0 or different MIO pins, change it
+# here and nothing else needs to move.
+set_property -dict [list \
+    CONFIG.PCW_UART1_PERIPHERAL_ENABLE {1} \
+    CONFIG.PCW_UART1_UART1_IO {MIO 48 .. 49} \
+    CONFIG.PCW_UART1_BAUD_RATE {115200} \
+] $ps
+
 # --- the HLS accelerator ----------------------------------------------------
 create_bd_cell -type ip -vlnv [format "xilinx.com:hls:%s:1.0" $ip_name] dnn_kernel_axi_0
 

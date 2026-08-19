@@ -35,6 +35,29 @@ apply_bd_automation -rule xilinx.com:bd_rule:processing_system7 \
              Master "Disable" Slave "Disable"} $ps
 set_property CONFIG.PCW_FPGA_FCLK0_ENABLE {1} $ps
 
+# 50 MHz, to match SEVEN_SEG_CLK_HZ in seven_segment_axi.h. The refresh counter
+# is derived from that constant, so a fabric clock far below it turns the digit
+# scan into visible flicker.
+set_property CONFIG.PCW_FPGA0_PERIPHERAL_FREQMHZ {50} $ps
+
+# Lab 2.2 is interactive: the application reads operands with scanf and prints
+# with printf. With no PS UART, printf goes nowhere and scanf blocks for ever,
+# with no error message - the board simply sits there.
+#
+# BOTH UARTs are enabled, which is what the known-working Blackboard platform
+# (~/lpd-lab/blkboard) does: UART_CLK_CTRL 0x00000A03, UART0 on MIO 14/15 and
+# UART1 on MIO 48/49. Which one the USB bridge is wired to is not settled - that
+# platform sets its stdout to UART0. Enabling both costs nothing, uses separate
+# pins, and lets the choice be made in the BSP alone, with no new bitstream.
+set_property -dict [list \
+    CONFIG.PCW_UART0_PERIPHERAL_ENABLE {1} \
+    CONFIG.PCW_UART0_UART0_IO {MIO 14 .. 15} \
+    CONFIG.PCW_UART0_BAUD_RATE {115200} \
+    CONFIG.PCW_UART1_PERIPHERAL_ENABLE {1} \
+    CONFIG.PCW_UART1_UART1_IO {MIO 48 .. 49} \
+    CONFIG.PCW_UART1_BAUD_RATE {115200} \
+] $ps
+
 # --- HLS calculator IP ------------------------------------------------------
 create_bd_cell -type ip -vlnv ces.kit.edu:hls:seven_segment_axi:1.0 seven_segment_axi_0
 
